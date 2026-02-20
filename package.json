@@ -1,6 +1,7 @@
 {
   "name": "buscali",
   "version": "1.0.0",
+  "license": "MIT",
   "description": "Backend de Buscali, una app de movilidad urbana",
   "main": "dist/app.js",
   "scripts": {
