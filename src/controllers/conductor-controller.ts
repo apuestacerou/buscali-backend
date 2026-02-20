@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import { ConductorService } from '../services/conductor-service';
 import { CreateConductorDTO, UpdateConductorDTO } from '../dto/conductor-dto';
 
+//TODO: agregar logica de validacion de datos y manejo de errores
+
 const service = new ConductorService();
 const router = Router();
 
