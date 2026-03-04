@@ -1,7 +1,7 @@
 # actualizar este archivo con la información del conductor.
 openapi: 3.0.0
 info:
-  title: Microservicio de Conductores
+  title: Servicio de Conductores
   description: API para gestionar conductores en el sistema de gestión integral.
   version: 1.0.0
 servers:

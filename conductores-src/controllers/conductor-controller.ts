@@ -11,7 +11,7 @@ const router = Router();
 router.get('/', async (req: Request, res: Response) => {
   try {
     const conductores = await service.list();
-    res.json(conductores);
+    res.status(200).json(conductores);
   } catch (error) {
     console.error('Error fetching conductores:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -23,10 +23,7 @@ router.get('/:cedula', async (req: Request, res: Response) => {
   try {
     const cedula = BigInt(req.params.cedula);
     const conductor = await service.get(cedula);
-    if (!conductor) {
-      return res.status(404).json({ message: 'Conductor not found' });
-    }
-    res.json(conductor);
+    res.status(200).json(conductor);
   } catch (error) {
     console.error('Error fetching conductor:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -51,10 +48,7 @@ router.put('/:cedula', async (req: Request, res: Response) => {
     const cedula = BigInt(req.params.cedula);
     const dto = new UpdateConductorDTO({ cedula, ...req.body }); 
     const update = await service.update(dto);
-    if (!update) {
-      return res.status(404).json({ message: 'Conductor not found' });
-    }
-    res.json(update);
+    res.status(200).json(update);
   } catch (error) {
     console.error('Error updating conductor:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -66,9 +60,6 @@ router.delete('/:cedula', async (req: Request, res: Response) => {
   try {
     const cedula = BigInt(req.params.cedula);
     const success = await service.delete(cedula);
-    if (!success) {
-      return res.status(404).json({ message: 'Conductor not found' });
-    }
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting conductor:', error);
