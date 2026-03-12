@@ -2,6 +2,7 @@ import { ConductorRepository } from '../repositories/conductor-repository';
 import { Conductor } from '../types/conductor';
 import { CreateConductorDTO, UpdateConductorDTO, ConductorResponseDTO } from '../dto/conductor-dto';
 import { ConflictError, ValidationError } from '../shared/error.class';
+import bcrypt from 'bcrypt';
 
 export class ConductorService {
   private repo = new ConductorRepository();
@@ -17,6 +18,12 @@ export class ConductorService {
     //valida que no exista un conductor con el mismo telefono
     const existing_telefono = await this.repo.findConductorByTelefono(dto.telefono);
     if (existing_telefono) { throw new ConflictError("Conductor con este telefono ya existe"); }
+
+    //hashea la contraseña antes de guardarla en la base de datos
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(dto.contrasena || '', saltRounds);
+    dto.contrasena = hashedPassword;
+
     //crea en la db y devuelve el nuevo conductor
     const c = await this.repo.createConductor(dto);
     return new ConductorResponseDTO(c);
@@ -50,6 +57,13 @@ export class ConductorService {
     const conductor: Conductor | null = await this.repo.findConductorByCedula(cedula);
     //verifica si el conductor existe, si no existe lanza un error
     if (!conductor) { throw new ValidationError("Conductor no encontrado"); }
+
+    //si se actualiza la contraseña, hashea la nueva contraseña antes de guardarla en la base de datos
+    if (dto.contrasena) {
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(dto.contrasena, saltRounds);
+      dto.contrasena = hashedPassword;
+    }
     const updated = await this.repo.updateConductor(cedula, dto);
     return updated ? new ConductorResponseDTO(updated) : null;
   }
