@@ -1,10 +1,19 @@
+/**
+ * Controlador de usuarios: maneja las peticiones HTTP del CRUD.
+ * Cada función recibe req (petición) y res (respuesta) de Express.
+ */
+
 import { Request, Response } from 'express';
 import { Usuario, RolUsuario } from '../models/Usuario';
 import bcrypt from 'bcrypt';
 
+// Vueltas de hashing para bcrypt (a mayor número, más seguro pero más lento)
 const SALT_ROUNDS = 10;
 
-/** Listar todos los usuarios (sin exponer passwordHash en JSON) */
+/**
+ * GET /api/usuarios - Listar todos los usuarios.
+ * No devolvemos passwordHash por seguridad.
+ */
 export async function listar(req: Request, res: Response): Promise<void> {
   try {
     const usuarios = await Usuario.findAll({
@@ -18,7 +27,10 @@ export async function listar(req: Request, res: Response): Promise<void> {
   }
 }
 
-/** Obtener un usuario por id */
+/**
+ * GET /api/usuarios/:id - Obtener un usuario por su ID.
+ * Parámetro id viene en req.params.id (string); lo convertimos a número.
+ */
 export async function obtenerPorId(req: Request, res: Response): Promise<void> {
   try {
     const id = Number(req.params.id);
@@ -40,7 +52,11 @@ export async function obtenerPorId(req: Request, res: Response): Promise<void> {
   }
 }
 
-/** Crear usuario. Body: { nombre, email?, telefono?, password, rol? } */
+/**
+ * POST /api/usuarios - Crear un nuevo usuario.
+ * Body: nombre (obligatorio), password (obligatorio, mínimo 6 caracteres), email, telefono, rol (opcionales).
+ * La contraseña se hashea con bcrypt antes de guardar.
+ */
 export async function crear(req: Request, res: Response): Promise<void> {
   try {
     const { nombre, email, telefono, password, rol } = req.body as {
@@ -59,9 +75,11 @@ export async function crear(req: Request, res: Response): Promise<void> {
       return;
     }
     const pwd = password as string;
+    // Si el rol viene en el body y es válido, lo usamos; si no, por defecto "pasajero"
     const rolValido: RolUsuario = ['pasajero', 'conductor', 'administrador'].includes(rol ?? '')
       ? (rol as RolUsuario)
       : 'pasajero';
+    // Hasheamos la contraseña para no guardarla en texto plano
     const passwordHash = await bcrypt.hash(pwd, SALT_ROUNDS);
     const usuario = await Usuario.create({
       nombre: nombre.trim(),
@@ -79,7 +97,10 @@ export async function crear(req: Request, res: Response): Promise<void> {
   }
 }
 
-/** Actualizar usuario. Body: { nombre?, email?, telefono?, password?, rol? } */
+/**
+ * PUT /api/usuarios/:id - Actualizar un usuario existente.
+ * Solo se actualizan los campos que vengan en el body (nombre, email, telefono, password, rol).
+ */
 export async function actualizar(req: Request, res: Response): Promise<void> {
   try {
     const id = Number(req.params.id);
@@ -123,7 +144,10 @@ export async function actualizar(req: Request, res: Response): Promise<void> {
   }
 }
 
-/** Eliminar usuario */
+/**
+ * DELETE /api/usuarios/:id - Eliminar un usuario.
+ * Respuesta 204 = éxito sin cuerpo en la respuesta.
+ */
 export async function eliminar(req: Request, res: Response): Promise<void> {
   try {
     const id = Number(req.params.id);

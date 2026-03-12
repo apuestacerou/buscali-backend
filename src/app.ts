@@ -1,3 +1,8 @@
+/**
+ * Punto de entrada del backend Buscali.
+ * Carga variables de entorno, configura Express, monta rutas e inicia el servidor.
+ */
+
 import 'dotenv/config';
 import 'reflect-metadata';
 import express from 'express';
@@ -10,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 app.get('/', (_req, res) => {
+  // Ruta raíz: devuelve info del API y endpoints disponibles
   res.json({
     service: 'Buscali Backend',
     message: 'API de movilidad urbana - Cali',
@@ -28,6 +34,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/usuarios', usuariosRoutes);
 
 app.use((_req, res) => {
+  // Cualquier ruta no definida arriba devuelve 404 con mensaje útil
   res.status(404).json({
     error: 'No encontrado',
     message: 'La ruta no existe. Prueba: GET / , GET /health , GET /api/usuarios',
@@ -49,5 +56,7 @@ async function start() {
     console.log(`🚀 Servidor en http://localhost:${PORT}`);
   });
 }
+
+// Arrancamos el servidor al cargar este archivo
 
 start();

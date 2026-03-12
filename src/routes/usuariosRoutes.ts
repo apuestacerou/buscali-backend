@@ -1,3 +1,9 @@
+/**
+ * Rutas de la API de usuarios.
+ * Todas estas rutas se montan bajo /api/usuarios en app.ts.
+ * Ejemplo: GET /api/usuarios → listar, GET /api/usuarios/1 → obtenerPorId.
+ */
+
 import { Router } from 'express';
 import * as usuariosController from '../controllers/usuariosController';
 
