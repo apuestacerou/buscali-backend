@@ -5,6 +5,8 @@ import conductorController from './controllers/conductor-controller'
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import { sequelize } from './config/database';
+import cors from 'cors';
+
 
 async function bootstrap() {
   try {
@@ -18,8 +20,16 @@ async function bootstrap() {
 
 bootstrap();
 
-
 const app = express();
+
+app.use(cors({
+  origin: ["http://localhost:5173", "https://tu-frontend.netlify.app"], 
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}))
+
+
+
 app.use(express.json());
 // ruta de la documentación Swagger apuntada al archivo YAML en su ubicacion despues de compilar a dist/docs
 const swaggerDocument = YAML.load('./docs/conductores.yaml');
