@@ -23,9 +23,8 @@ bootstrap();
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:5173", "https://tu-frontend.netlify.app"], 
+  origin: "*", 
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
 }))
 
 
