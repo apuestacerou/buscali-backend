@@ -7,6 +7,25 @@ import bcrypt from 'bcrypt';
 export class ConductorService {
   private repo = new ConductorRepository();
 
+  //obtener todos los conductores
+  async list(): Promise<ConductorResponseDTO[]> {
+    const conductores: Conductor[] = await this.repo.findAllConductores();
+    //verifica si hay conductores, si no hay lanza un error
+    if (conductores.length === 0) {
+      throw new ValidationError('Conductores no encontrados');
+    }
+    return conductores.map(c => new ConductorResponseDTO(c));
+  }
+
+  //obtener conductor por cedula
+  async get(cedula: string): Promise<ConductorResponseDTO | null> {
+    const conductor: Conductor | null = await this.repo.findConductorByCedula(cedula);
+    //verifica si el conductor existe, si no existe lanza un error
+    if (!conductor) { throw new ValidationError("Conductor no encontrado"); }
+    return conductor ? new ConductorResponseDTO(conductor) : null;
+  }
+
+  //crear conductor
   async create(dto: CreateConductorDTO): Promise<ConductorResponseDTO> {
     //TODO: en create y update, unir los errores cuando son mas de uno en una sola salida para el cliente, en vez de lanzar un error por cada validacion fallida, se pueden acumular los errores y lanzarlos juntos al final del proceso de validacion. Esto mejora la experiencia del usuario al mostrar todos los problemas de una vez en lugar de tener que corregir uno por uno.
      //valida que no exista un conductor con la misma cedula
@@ -32,22 +51,7 @@ export class ConductorService {
     return new ConductorResponseDTO(c);
   }
 
-  async list(): Promise<ConductorResponseDTO[]> {
-    const conductores: Conductor[] = await this.repo.findAllConductores();
-    //verifica si hay conductores, si no hay lanza un error
-    if (conductores.length === 0) {
-      throw new ValidationError('Conductores no encontrados');
-    }
-    return conductores.map(c => new ConductorResponseDTO(c));
-  }
-
-  async get(cedula: string): Promise<ConductorResponseDTO | null> {
-    const conductor: Conductor | null = await this.repo.findConductorByCedula(cedula);
-    //verifica si el conductor existe, si no existe lanza un error
-    if (!conductor) { throw new ValidationError("Conductor no encontrado"); }
-    return conductor ? new ConductorResponseDTO(conductor) : null;
-  }
-
+  //actualizar conductor
   async update(cedula: string, dto: UpdateConductorDTO): Promise<ConductorResponseDTO | null> {
     const errors: string[] = [];
     //valida que no exista un conductor con el mismo correo_electronico
@@ -73,6 +77,7 @@ export class ConductorService {
     return updated ? new ConductorResponseDTO(updated) : null;
   }
 
+  //eliminar conductor por cedula
   async delete(cedula: string): Promise<boolean> {
     const conductor: Conductor | null = await this.repo.findConductorByCedula(cedula);
     //verifica si el conductor existe, si no existe lanza un error

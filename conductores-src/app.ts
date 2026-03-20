@@ -22,6 +22,7 @@ bootstrap();
 
 const app = express();
 
+//aceptar todos los origenes de momento, corregir despues
 app.use(cors({
   origin: "*", 
   methods: ["GET", "POST", "PUT", "DELETE"],
