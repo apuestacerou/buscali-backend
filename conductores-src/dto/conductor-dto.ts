@@ -1,4 +1,3 @@
-import { Is } from 'sequelize-typescript';
 import { Conductor } from '../types/conductor'
 import { IsEmail, IsEnum, IsOptional, Matches} from 'class-validator';
 
@@ -68,4 +67,12 @@ export class ConductorResponseDTO {
     this.cedula = conductor.cedula;
     this.estado = conductor.estado;
   }
+}
+
+//DTO para login
+export class ConductorLogin {
+  @Matches(/^\+?[0-9]{7,15}$/, { message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos' }) // Validación para permitir solo dígitos en el teléfono
+  telefono!: string
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" }) // Validación para contraseñas seguras
+  contrasena!: string
 }

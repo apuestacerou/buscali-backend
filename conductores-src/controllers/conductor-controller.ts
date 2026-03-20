@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { ConductorService } from '../services/conductor-service';
-import { CreateConductorDTO, UpdateConductorDTO } from '../dto/conductor-dto';
+import { CreateConductorDTO, UpdateConductorDTO, ConductorLogin} from '../dto/conductor-dto';
 import { plainToInstance } from 'class-transformer';
 import { ConflictError, ValidationError, checkDto } from '../shared/error.class';
 
@@ -89,10 +89,28 @@ router.delete('/:cedula', async (req: Request, res: Response) => {
     res.status(204).json({ success: "Conductor eliminado exitosamente" });
   } catch (error) {
     if (error instanceof ValidationError) 
-      { return res.status(400).json({ error: error.messages }); } 
+      { return res.status(404).json({ error: error.messages }); } 
     console.error('Error eliminando conductor:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
+
+
+// Login 
+router.post('/login', async (req: Request,res: Response)=>{
+  try {
+    const dto: ConductorLogin = plainToInstance(ConductorLogin, req.body as Record<string, unknown>);
+    await checkDto(dto)
+    const conductor = await service.login(dto);
+    res.status(200).json({'Sesión':'Iniciada', conductor});
+  } catch (error) {
+    if (error instanceof ConflictError) 
+      { return res.status(409).json({ error: error.messages }); } 
+      if (error instanceof ValidationError) 
+      { return res.status(400).json({ error: error.messages }); } 
+      console.error("Error creando conductor:", error); 
+      res.status(500).json({ error: "Error interno del servidor" });
+  }
+})
 
 export default router;
