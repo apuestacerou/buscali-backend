@@ -7,7 +7,7 @@ import YAML from 'yamljs';
 import { sequelize } from './config/database';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import jwt from 'jsonwebtoken';
+import { jwtAuth } from './middlewares/jwtAuth';
 
 
 async function bootstrap() {
@@ -49,19 +49,8 @@ app.use(cors({
 // mmiddleware cookie-parser para usar cookies
 app.use(cookieParser())
 
-//middleware jwt
-app.use((req,_res,next) =>{
-const token= req.cookies.access_token
-req.auth = null;
-try {
-  const data = jwt.verify(token, process.env.SECRET_JWT_KEY!)
-  req.auth = data
-}catch (err) {
-  // console.error('Token inválido:', err.message);
-  // opcional: return res.status(401).json({ error: 'Token inválido' });
-}
-next() //seguir a la siguiente ruta o middleware
-})
+//middleware para verificar el jwt
+app.use(jwtAuth)
 
 
 
