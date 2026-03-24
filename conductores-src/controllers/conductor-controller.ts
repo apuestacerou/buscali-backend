@@ -4,6 +4,7 @@ import { CreateConductorDTO, UpdateConductorDTO, ConductorLoginDTO} from '../dto
 import { plainToInstance } from 'class-transformer';
 import { checkDto } from '../shared/error.class';
 import { requireAuth } from '../middlewares/requireAuth';
+import { sendSuccess } from '../utils/respuestaExitosa';
 
 const service = new ConductorService();
 const router = Router();
@@ -13,12 +14,7 @@ router.get('/', requireAuth, async (req: Request, res: Response, next: NextFunct
 
   try {
     const conductores = await service.list();
-    return res.status(200).json({
-      status: "success",
-      code: 200,
-      message: "Conductores listados correctamente",
-      data: conductores
-    });
+    return sendSuccess(res, 200, "Conductores listados correctamente" , conductores)
   } catch (error) {
     return next(error);
   }
@@ -29,12 +25,7 @@ router.get('/:cedula', requireAuth, async (req: Request, res: Response, next: Ne
   try {
     const cedula = req.params.cedula;
     const conductor = await service.get(cedula);
-    return res.status(200).json({
-      status: "success",
-      code: 200,
-      message: "Conductor encontrado",
-      data: conductor
-    });
+    return sendSuccess(res, 200 , "Conductor encontrado" ,conductor)
   } catch (error) {
     return next(error)
   }
@@ -47,12 +38,7 @@ router.post('/', requireAuth, async (req: Request, res: Response, next: NextFunc
     const dto: CreateConductorDTO = plainToInstance(CreateConductorDTO, req.body as Record<string, unknown>);
     await checkDto(dto);
     const newConductor = await service.create(dto);
-    return res.status(201).json({
-      status: "success",
-      code: 201,
-      message: "Conductor creado correctamente",
-      data: newConductor
-    });
+    return sendSuccess(res, 201 , "Conductor creado correctamente" , newConductor)
   } catch (error) {
     return next(error)
   }
@@ -70,12 +56,7 @@ router.put('/:cedula', requireAuth, async (req: Request, res: Response, next: Ne
     await checkDto(dto);
 
     const update = await service.update(cedula, dto);
-    return res.status(200).json({
-      status: "success",
-      code: 201,
-      message: "Conductor actualizado correctamente",
-      data: update
-    });
+    return sendSuccess(res, 200, "Conductor actualizado correctamente", update)
   } catch (error) {
     return next(error)
   }
@@ -86,12 +67,7 @@ router.delete('/:cedula', requireAuth, async (req: Request, res: Response, next:
   try {
     const cedula = req.params.cedula;
     await service.delete(cedula);
-    return res.status(204)
-    // .json({
-    //   status: "success",
-    //   code: 204,
-    //   message: "Conductor eliminado correctamente"
-    // });
+    return res.status(204);
   } catch (error) {
   return next(error)
   }
@@ -105,8 +81,7 @@ router.post('/login', async (req: Request,res: Response, next: NextFunction)=>{
     const dto: ConductorLoginDTO = plainToInstance(ConductorLoginDTO, req.body as Record<string, unknown>);
     await checkDto(dto)
     const login = await service.login(dto);
-    return res
-    .cookie('access_token', //nombre
+    res.cookie('access_token', //nombre
       login.token, //contenido
       //config
       {httpOnly: true, // solo se accede en el servidor
@@ -114,11 +89,7 @@ router.post('/login', async (req: Request,res: Response, next: NextFunction)=>{
       sameSite: 'strict'}  // la cookie solo se accede desde el mismo dominio
       //maxAge: 1000 * 60 * 60} // la cookie solo es valida 1 hora
     )
-    .status(200).json({
-      status: "success",
-      code: 200,
-      message: "Sesión iniciada correctamente"
-    });
+    return sendSuccess(res, 200, "Sesión iniciada correctamente")
   } catch (error) {
     return next(error)
   }
@@ -133,15 +104,9 @@ router.post("/logout", requireAuth, (req: Request, res: Response, next: NextFunc
       secure: true, // usa true si estás en HTTPS
       sameSite: "strict",
     });
-  
     // Limpia el estado de autenticación en el request
     req.auth = null;
-  
-    return res.status(200).json({
-      status: "success",
-      code: 200,
-      message: "Sesión cerrada correctamente"
-    });
+    return sendSuccess(res, 200, "Sesión cerrada correctamente")
   } catch (error) {
     return next(error)
   }
