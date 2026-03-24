@@ -3,13 +3,14 @@ import { ConductorService } from '../services/conductor-service';
 import { CreateConductorDTO, UpdateConductorDTO, ConductorLogin} from '../dto/conductor-dto';
 import { plainToInstance } from 'class-transformer';
 import { ConflictError, ValidationError, checkDto } from '../shared/error.class';
+import { requireAuth } from '../middlewares/requireAuth';
 
 const service = new ConductorService();
 const router = Router();
 
 // Listar todos los conductores
-router.get('/', async (req: Request, res: Response) => {
-  if(!req.auth){return res.status(401).json({ error: "Debe iniciar sesión" });}
+router.get('/', requireAuth, async (req: Request, res: Response) => {
+
   try {
     const conductores = await service.list();
     res.status(200).json(conductores);
@@ -24,7 +25,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Obtener conductor por ID
-router.get('/:cedula', async (req: Request, res: Response) => {
+router.get('/:cedula', requireAuth, async (req: Request, res: Response) => {
   try {
     const cedula = req.params.cedula;
     const conductor = await service.get(cedula);
@@ -38,7 +39,7 @@ router.get('/:cedula', async (req: Request, res: Response) => {
 });
 
 // Crear un nuevo conductor
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', requireAuth, async (req: Request, res: Response) => {
   try {
     // transforma y valida en un solo paso utilizando el helper
     const dto: CreateConductorDTO = plainToInstance(CreateConductorDTO, req.body as Record<string, unknown>);
@@ -57,7 +58,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Actualizar un conductor existente
-router.put('/:cedula', async (req: Request, res: Response) => {
+router.put('/:cedula', requireAuth, async (req: Request, res: Response) => {
   try {
     // transforma  req.body(JSON) a UpdateConductorDTO y valida los datos usando class-validator
     const cedula = req.params.cedula;
@@ -80,7 +81,7 @@ router.put('/:cedula', async (req: Request, res: Response) => {
 });
 
 // Eliminar un conductor
-router.delete('/:cedula', async (req: Request, res: Response) => {
+router.delete('/:cedula', requireAuth, async (req: Request, res: Response) => {
   try {
     const cedula = req.params.cedula;
     const success = await service.delete(cedula);
@@ -122,8 +123,7 @@ router.post('/login', async (req: Request,res: Response)=>{
 })
 
 //logout
-router.post("/logout", (req: Request, res: Response) => {
-  if(!req.auth){return res.status(400).json({mensaje: ["No hay una sesión activa"]})}
+router.post("/logout", requireAuth, (req: Request, res: Response) => {
   // Borra la cookie que guarda el JWT
   res.clearCookie("access_token", {
     httpOnly: true,
