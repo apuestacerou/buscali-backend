@@ -21,6 +21,16 @@ export class ConflictError extends Error {
   }
 }
 
+export class UnauthorizedError extends Error {
+  public readonly messages: string[];
+  constructor(messages: string[] | string) {
+    super(Array.isArray(messages) ? messages.join("; ") : messages);
+    this.name = "UnauthorizedError";
+    this.messages = Array.isArray(messages) ? messages : [messages];
+  }
+}
+
+
 // ayuda para validar DTOs usando class-validator
 import { validate } from 'class-validator';
 

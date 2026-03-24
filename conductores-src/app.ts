@@ -8,6 +8,7 @@ import { sequelize } from './config/database';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { jwtAuth } from './middlewares/jwtAuth';
+import { errorHandler } from './middlewares/errorHandler';
 
 
 async function bootstrap() {
@@ -74,4 +75,6 @@ app.listen(PORT, () => {
 
 });
 
+//middleware para manejar errores
+app.use(errorHandler)
 export default app;
