@@ -6,6 +6,8 @@ import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import { sequelize } from './config/database';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken';
 
 
 async function bootstrap() {
@@ -22,16 +24,48 @@ bootstrap();
 
 const app = express();
 
-//aceptar todos los origenes de momento, corregir despues
-app.use(cors({
-  origin: "*", 
-  methods: ["GET", "POST", "PUT", "DELETE"],
-}))
-
-
-
+// Middleware's
 app.use(express.json());
-// ruta de la documentación Swagger apuntada al archivo YAML en su ubicacion despues de compilar a dist/docs
+
+//array de direcciones permitidas
+const allowedOrigins = [
+  'https://buscali.netlify.app', // producción
+  'http://localhost:3000'        // desarrollo local
+];
+
+//middleware CORS solo permite peticiones desde produccion, local y peticiones como postman
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
+// mmiddleware cookie-parser para usar cookies
+app.use(cookieParser())
+
+//middleware jwt
+app.use((req,_res,next) =>{
+const token= req.cookies.access_token
+req.auth = null;
+try {
+  const data = jwt.verify(token, process.env.SECRET_JWT_KEY!)
+  req.auth = data
+}catch (err) {
+  // console.error('Token inválido:', err.message);
+  // opcional: return res.status(401).json({ error: 'Token inválido' });
+}
+next() //seguir a la siguiente ruta o middleware
+})
+
+
+
+// Ruta de la documentación Swagger apuntada al archivo YAML en su ubicacion despues de compilar a dist/docs
 const swaggerDocument = YAML.load('./docs/conductores.yaml');
 
 // Health check

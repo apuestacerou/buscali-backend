@@ -8,6 +8,7 @@ import {
 } from '../dto/conductor-dto';
 import { ConflictError, ValidationError } from '../shared/error.class';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 export class ConductorService {
   private repo = new ConductorRepository();
@@ -103,12 +104,6 @@ export class ConductorService {
       throw new ValidationError('Conductor no encontrado');
     }
 
-    //si se actualiza la contraseña, hashea la nueva contraseña antes de guardarla en la base de datos
-    if (dto.contrasena) {
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(dto.contrasena, saltRounds);
-      dto.contrasena = hashedPassword;
-    }
     const updated = await this.repo.updateConductor(cedula, dto);
     return updated ? new ConductorResponseDTO(updated) : null;
   }
@@ -124,18 +119,20 @@ export class ConductorService {
     return await this.repo.deleteConductor(cedula);
   }
   //Login
-  async login(dto: ConductorLogin): Promise<ConductorResponseDTO> {
+  async login(dto: ConductorLogin): Promise<{token: string}> {
+
     const errors: string[] = [];
     //valida que exista un conductor con ese telefono
     const existing_conductor = await this.repo.findConductorByTelefono(
       dto.telefono,
     );
-    // console.log(existing_conductor)
 
-    //muestra solo un error a la vez, porq es imposible tener los dos al tiempo
-    // es imposible tener la contraseña mala para un telefono q no existe
-    // pero si es posible q el telefono este malo
-    // y q la contraseña este mal para un telefono q si existe
+    {
+      //muestra solo un error a la vez, porq es imposible tener los dos al tiempo
+      // es imposible tener la contraseña mala para un telefono q no existe
+      // pero si es posible q el telefono este malo
+      // y q la contraseña este mal para un telefono q si existe
+    }
     if (!existing_conductor) {
       errors.push('Conductor con este telefono no existe');
     } else {
@@ -147,16 +144,18 @@ export class ConductorService {
         errors.push('Contraseña no Valida');
       }
     }
-
-    // console.log("hash",existing_conductor.contrasena)
-    // console.log("plano",dto.contrasena)
-    // console.log(isValid)
-
-    // console.log(existing_conductor.contrasena)
-    // console.log(dto.contrasena)
     if (errors.length > 0) {
       throw new ValidationError(errors);
     }
-    return new ConductorResponseDTO(existing_conductor!);
+    const payload = {
+      sub: existing_conductor!.cedula
+    }
+    //jwt firmado
+    // contenido, firma y expiracion
+    const token = jwt.sign({ payload }, process.env.SECRET_JWT_KEY!, {
+      expiresIn: '1h',
+    });
+
+    return {token};
   }
 }

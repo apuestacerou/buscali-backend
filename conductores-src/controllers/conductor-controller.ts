@@ -4,14 +4,12 @@ import { CreateConductorDTO, UpdateConductorDTO, ConductorLogin} from '../dto/co
 import { plainToInstance } from 'class-transformer';
 import { ConflictError, ValidationError, checkDto } from '../shared/error.class';
 
-//DONE: agregar logica de validacion de datos y manejo de errores
-// solucionar validacion para telefono, sustituirstring para que no hayan errores de tipo en class-validator
-
 const service = new ConductorService();
 const router = Router();
 
 // Listar todos los conductores
 router.get('/', async (req: Request, res: Response) => {
+  if(!req.auth){return res.status(401).json({ error: "Debe iniciar sesión" });}
   try {
     const conductores = await service.list();
     res.status(200).json(conductores);
@@ -99,18 +97,64 @@ router.delete('/:cedula', async (req: Request, res: Response) => {
 // Login 
 router.post('/login', async (req: Request,res: Response)=>{
   try {
+    //inicio de sesion
     const dto: ConductorLogin = plainToInstance(ConductorLogin, req.body as Record<string, unknown>);
     await checkDto(dto)
-    const conductor = await service.login(dto);
-    res.status(200).json({'Sesión':'Iniciada', conductor});
+    const login = await service.login(dto);
+    res
+    .cookie('access_token', //nombre
+      login.token, //contenido
+      //config
+      {httpOnly: true, // solo se accede en el servidor
+      secure: process.env.NODE_ENV === 'production', //solo se accede por https
+      sameSite: 'strict'}  // la cookie solo se accede desde el mismo dominio
+      //maxAge: 1000 * 60 * 60} // la cookie solo es valida 1 hora
+    )
+    .status(200).json({mensaje:['Sesión iniciada']});
   } catch (error) {
     if (error instanceof ConflictError) 
       { return res.status(409).json({ error: error.messages }); } 
       if (error instanceof ValidationError) 
       { return res.status(400).json({ error: error.messages }); } 
-      console.error("Error creando conductor:", error); 
+      console.error("Error iniciando sesión:", error); 
       res.status(500).json({ error: "Error interno del servidor" });
   }
 })
+
+//logout
+router.post("/logout", (req: Request, res: Response) => {
+  if(!req.auth){return res.status(400).json({mensaje: ["No hay una sesión activa"]})}
+  // Borra la cookie que guarda el JWT
+  res.clearCookie("access_token", {
+    httpOnly: true,
+    secure: true, // usa true si estás en HTTPS
+    sameSite: "strict",
+  });
+
+  // Limpia el estado de autenticación en el request
+  req.auth = null;
+
+  return res.status(200).json({ mensaje: ["Sesión cerrada correctamente"] });
+});
+
+// //Recuperar Contraseña
+// router.put('/recuperar_contraseña', async (req:Request, res:Response) =>{
+// try {
+//   const dto: ConductorLogin = plainToInstance(ConductorLogin, req.body as Record<string, unknown>);
+//   await checkDto(dto)
+//   const conductor = await service.login(dto);
+//     res.status(200).json({'Contraseña':'Cambiada', conductor});
+  
+
+// } catch (error) {
+//   if (error instanceof ConflictError) 
+//     { return res.status(409).json({ error: error.messages }); } 
+//     if (error instanceof ValidationError) 
+//     { return res.status(400).json({ error: error.messages }); } 
+//     console.error("Error creando conductor:", error); 
+//     res.status(500).json({ error: "Error interno del servidor" });
+// }
+
+// })
 
 export default router;
