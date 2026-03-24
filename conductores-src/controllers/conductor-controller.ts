@@ -2,9 +2,9 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { ConductorService } from '../services/conductor-service';
 import { CreateConductorDTO, UpdateConductorDTO, ConductorLoginDTO} from '../dto/conductor-dto';
 import { plainToInstance } from 'class-transformer';
-import { checkDto } from '../shared/error.class';
+import { checkDto } from '../errors/error.class';
 import { requireAuth } from '../middlewares/requireAuth';
-import { sendSuccess } from '../utils/respuestaExitosa';
+import { sendSuccess } from '../utils/sendSuccess';
 
 const service = new ConductorService();
 const router = Router();

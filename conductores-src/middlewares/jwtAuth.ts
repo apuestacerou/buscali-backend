@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { UnauthorizedError } from "../shared/error.class";
+import { UnauthorizedError } from "../errors/error.class";
 
 //middleware jwt
 export function jwtAuth(req: Request, res: Response, next: NextFunction) {

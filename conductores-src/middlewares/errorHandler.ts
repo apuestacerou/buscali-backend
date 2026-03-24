@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ValidationError, ConflictError, UnauthorizedError } from "../shared/error.class";
+import { ValidationError, ConflictError, UnauthorizedError } from "../errors/error.class";
 
 export function errorHandler(err: any, _req: Request, res: Response, _next: NextFunction) {
   console.error("Error capturado:", err);
