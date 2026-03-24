@@ -4,7 +4,7 @@ import {
   CreateConductorDTO,
   UpdateConductorDTO,
   ConductorResponseDTO,
-  ConductorLogin,
+  ConductorLoginDTO,
 } from '../dto/conductor-dto';
 import { ConflictError, ValidationError } from '../shared/error.class';
 import bcrypt from 'bcrypt';
@@ -119,7 +119,7 @@ export class ConductorService {
     return await this.repo.deleteConductor(cedula);
   }
   //Login
-  async login(dto: ConductorLogin): Promise<{token: string}> {
+  async login(dto: ConductorLoginDTO): Promise<{token: string}> {
 
     const errors: string[] = [];
     //valida que exista un conductor con ese telefono

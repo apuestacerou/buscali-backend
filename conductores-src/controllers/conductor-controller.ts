@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { ConductorService } from '../services/conductor-service';
-import { CreateConductorDTO, UpdateConductorDTO, ConductorLogin} from '../dto/conductor-dto';
+import { CreateConductorDTO, UpdateConductorDTO, ConductorLoginDTO} from '../dto/conductor-dto';
 import { plainToInstance } from 'class-transformer';
 import { checkDto } from '../shared/error.class';
 import { requireAuth } from '../middlewares/requireAuth';
@@ -102,7 +102,7 @@ router.delete('/:cedula', requireAuth, async (req: Request, res: Response, next:
 router.post('/login', async (req: Request,res: Response, next: NextFunction)=>{
   try {
     //inicio de sesion
-    const dto: ConductorLogin = plainToInstance(ConductorLogin, req.body as Record<string, unknown>);
+    const dto: ConductorLoginDTO = plainToInstance(ConductorLoginDTO, req.body as Record<string, unknown>);
     await checkDto(dto)
     const login = await service.login(dto);
     return res
@@ -150,7 +150,7 @@ router.post("/logout", requireAuth, (req: Request, res: Response, next: NextFunc
 // //Recuperar Contraseña
 // router.put('/recuperar_contraseña', async (req:Request, res:Response) =>{
 // try {
-//   const dto: ConductorLogin = plainToInstance(ConductorLogin, req.body as Record<string, unknown>);
+//   const dto: ConductorLoginDTO = plainToInstance(ConductorLoginDTO, req.body as Record<string, unknown>);
 //   await checkDto(dto)
 //   const conductor = await service.login(dto);
 //     res.status(200).json({'Contraseña':'Cambiada', conductor});
