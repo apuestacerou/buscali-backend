@@ -1,0 +1,267 @@
+openapi: 3.0.0
+info:
+  title: Servicio de Conductores
+  description: API para gestionar conductores en el sistema de gestión integral.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api/v1
+paths:
+  /conductores:
+    get:
+      summary: Obtener todos los conductores
+      responses:
+        '200':
+          description: Lista de conductores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConductorResponse'
+              examples:
+                ejemploLista:
+                  value:
+                    - cedula: "123456789"
+                      nombre: "Juan Pérez"
+                      correo_electronico: "juan.perez@example.com"
+                      telefono: "+573001234567"
+                      estado: "Activo"
+                    - cedula: "987654321"
+                      nombre: "María Gómez"
+                      correo_electronico: "maria.gomez@example.com"
+                      telefono: "+573009876543"
+                      estado: "Inactivo"
+        '400':
+          description: No se encontraron conductores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                ejemploError:
+                  value:
+                    error: ["Conductores no encontrados"]
+
+    post:
+      summary: Crear un nuevo conductor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConductorCreate'
+            examples:
+              ejemploValido:
+                value:
+                  cedula: "123456789"
+                  nombre: "Juan Pérez"
+                  correo_electronico: "juan.perez@example.com"
+                  telefono: "+573001234567"
+                  contrasena: "Password@123"
+                  estado: "Activo"
+      responses:
+        '201':
+          description: Conductor creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConductorResponse'
+              examples:
+                ejemploRespuesta:
+                  value:
+                    cedula: "123456789"
+                    nombre: "Juan Pérez"
+                    correo_electronico: "juan.perez@example.com"
+                    telefono: "+573001234567"
+                    estado: "Activo"
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                ejemploErrorValidacion:
+                  value:
+                    error:
+                      - "Formato de correo electrónico inválido"
+                      - "Telefono debe contener solo Números y entre 7 y 15 dígitos"
+        '409':
+          description: Conflicto por datos duplicados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                ejemploErrorConflicto:
+                  value:
+                    error:
+                      - "Conductor con esta cedula ya existe"
+                      - "Conductor con este correo electronico ya existe"
+
+  /conductores/{cedula}:
+    get:
+      summary: Obtener un conductor por cédula
+      parameters:
+        - name: cedula
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conductor encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConductorResponse'
+              examples:
+                ejemploConductor:
+                  value:
+                    cedula: "123456789"
+                    nombre: "Juan Pérez"
+                    correo_electronico: "juan.perez@example.com"
+                    telefono: "+573001234567"
+                    estado: "Activo"
+        '404':
+          description: Conductor no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                ejemploError404:
+                  value:
+                    error: ["Conductor no encontrado"]
+
+    put:
+      summary: Actualizar un conductor
+      parameters:
+        - name: cedula
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConductorUpdate'
+            examples:
+              ejemploUpdate:
+                value:
+                  nombre: "Juan Pérez Actualizado"
+                  telefono: "+573001111111"
+                  estado: "Inactivo"
+      responses:
+        '200':
+          description: Conductor actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConductorResponse'
+              examples:
+                ejemploRespuestaUpdate:
+                  value:
+                    cedula: "123456789"
+                    nombre: "Juan Pérez Actualizado"
+                    correo_electronico: "juan.perez@example.com"
+                    telefono: "+573001111111"
+                    estado: "Inactivo"
+        '404':
+          description: Conductor no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Eliminar un conductor
+      parameters:
+        - name: cedula
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Conductor eliminado exitosamente
+        '404':
+          description: Conductor no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                ejemploErrorDelete:
+                  value:
+                    error: ["Conductor no encontrado"]
+
+components:
+  schemas:
+    ConductorCreate:
+      type: object
+      properties:
+        cedula:
+          type: string
+          description: Solo números, máximo 20 dígitos
+        nombre:
+          type: string
+          description: Solo letras y espacios
+        correo_electronico:
+          type: string
+          format: email
+        telefono:
+          type: string
+          description: Entre 7 y 15 dígitos, puede incluir prefijo internacional
+        contrasena:
+          type: string
+          description: Opcional. Debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo
+        estado:
+          type: string
+          enum: ["Activo", "Inactivo"]
+      required:
+        - cedula
+        - nombre
+        - correo_electronico
+        - telefono
+
+    ConductorUpdate:
+      type: object
+      properties:
+        nombre:
+          type: string
+        correo_electronico:
+          type: string
+          format: email
+        telefono:
+          type: string
+        contrasena:
+          type: string
+        estado:
+          type: string
+          enum: ["Activo", "Inactivo"]
+
+    ConductorResponse:
+      type: object
+      properties:
+        cedula:
+          type: string
+        nombre:
+          type: string
+        correo_electronico:
+          type: string
+        telefono:
+          type: string
+        estado:
+          type: string
+          enum: ["Activo", "Inactivo"]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: array
+          items:
+            type: string
