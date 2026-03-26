@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
-import conductorController from './controllers/conductor-controller'
+import conductorRouter from './routers/conductor-router';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import { sequelize } from './config/database';
@@ -9,7 +9,6 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { jwtAuth } from './middlewares/jwtAuth';
 import { errorHandler } from './middlewares/errorHandler';
-
 
 async function bootstrap() {
   try {
@@ -31,38 +30,40 @@ app.use(express.json());
 //array de direcciones permitidas
 const allowedOrigins = [
   'https://buscali.netlify.app', // producción
-  'http://localhost:3000'        // desarrollo local
+  'http://localhost:3000', // desarrollo local
 ];
 
 //middleware CORS solo permite peticiones desde produccion, local y peticiones como postman
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('No permitido por CORS'));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('No permitido por CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  }),
+);
 
 // mmiddleware cookie-parser para usar cookies
-app.use(cookieParser())
+app.use(cookieParser());
 
 //middleware para verificar el jwt
-app.use(jwtAuth)
-
-
+app.use(jwtAuth);
 
 // Ruta de la documentación Swagger apuntada al archivo YAML en su ubicacion despues de compilar a dist/docs
 const swaggerDocument = YAML.load('./docs/conductores.yaml');
 
 // Health check
-app.get('/health', (_req, res) => res.json({ status: 'OK', service: 'conductores-service' }));
+app.get('/health', (_req, res) =>
+  res.json({ status: 'OK', service: 'conductores-service' }),
+);
 
-app.use('/api/v1/conductores', conductorController);
-app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.use('/api/v1/conductores', conductorRouter);
+app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 app.listen(PORT, () => {
@@ -72,9 +73,8 @@ app.listen(PORT, () => {
   console.log(`    POST   /api/v1/conductores`);
   console.log(`    GET    /api/v1/conductores/:id`);
   console.log(`  Swagger docs: http://localhost:${PORT}/api/v1/docs`);
-
 });
 
 //middleware para manejar errores
-app.use(errorHandler)
+app.use(errorHandler);
 export default app;
