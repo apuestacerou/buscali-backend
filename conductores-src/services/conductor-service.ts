@@ -36,7 +36,6 @@ export class ConductorService {
 
   //crear conductor
   async create(dto: CreateConductorDTO): Promise<ConductorResponseDTO> {
-    //TODO: en create y update, unir los errores cuando son mas de uno en una sola salida para el cliente, en vez de lanzar un error por cada validacion fallida, se pueden acumular los errores y lanzarlos juntos al final del proceso de validacion. Esto mejora la experiencia del usuario al mostrar todos los problemas de una vez en lugar de tener que corregir uno por uno.
     //valida que no exista un conductor con la misma cedula
     const errors: string[] = [];
 
@@ -119,8 +118,7 @@ export class ConductorService {
     return await this.repo.deleteConductor(cedula);
   }
   //Login
-  async login(dto: ConductorLoginDTO): Promise<{token: string}> {
-
+  async login(dto: ConductorLoginDTO): Promise<{ token: string }> {
     const errors: string[] = [];
     //valida que exista un conductor con ese telefono
     const existing_conductor = await this.repo.findConductorByTelefono(
@@ -148,14 +146,14 @@ export class ConductorService {
       throw new ValidationError(errors);
     }
     const payload = {
-      sub: existing_conductor!.cedula
-    }
+      sub: existing_conductor!.cedula,
+    };
     //jwt firmado
     // contenido, firma y expiracion
     const token = jwt.sign({ payload }, process.env.SECRET_JWT_KEY!, {
       expiresIn: '1h',
     });
 
-    return {token};
+    return { token };
   }
 }
