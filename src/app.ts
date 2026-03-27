@@ -2,11 +2,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import conductorRouter from './conductores/routers/conductor-router';
+import rutasRouter from './rutas/routers/rutas-router';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import { sequelize } from './config/database';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+//middleware's
 import { jwtAuth } from './middlewares/jwtAuth';
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -55,7 +57,7 @@ app.use(cookieParser());
 app.use(jwtAuth);
 
 // Ruta de la documentación Swagger apuntada al archivo YAML en su ubicacion despues de compilar a dist/docs
-const swaggerDocument = YAML.load('./src/docs/conductores.yaml');
+const swaggerDocument = YAML.load('./src/api-docs/conductores.yaml');
 
 // Health check
 app.get('/health', (_req, res) =>
@@ -63,15 +65,15 @@ app.get('/health', (_req, res) =>
 );
 
 app.use('/api/v1/conductores', conductorRouter);
+app.use('/api/v1/rutas', rutasRouter);
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 app.listen(PORT, () => {
   console.log(`✓ Conductores service running on http://localhost:${PORT}`);
   console.log(`  Endpoints:`);
-  console.log(`    GET    /api/v1/conductores`);
-  console.log(`    POST   /api/v1/conductores`);
-  console.log(`    GET    /api/v1/conductores/:id`);
+  console.log(`    conductores    /api/v1/conductores`);
+  console.log(`    rutas   /api/v1/rutas`);
   console.log(`  Swagger docs: http://localhost:${PORT}/api/v1/docs`);
 });
 

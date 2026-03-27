@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize-typescript';
 import { ConductorModel } from '../conductores/models/conductor-model';
+import { RutaModel } from '../rutas/models/ruta-model';
 
 const sequelize = new Sequelize(process.env.DATABASE_URL!, {
   dialect: 'postgres',
@@ -9,7 +10,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL!, {
       rejectUnauthorized: false, // útil si no tienes certificado CA
     },
   },
-  models: [ConductorModel], // carga modelos desde la carpeta models
+  models: [ConductorModel, RutaModel], // carga modelos desde la carpeta models
 });
 
 export { sequelize };
