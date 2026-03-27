@@ -7,7 +7,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL!, {
   dialectOptions: {
     ssl: {
       require: true,
-      rejectUnauthorized: false, // útil si no tienes certificado CA
+      rejectUnauthorized: true, // útil si no tienes certificado CA
     },
   },
   models: [ConductorModel, RutaModel], // carga modelos desde la carpeta models
