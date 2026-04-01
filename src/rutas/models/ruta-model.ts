@@ -20,11 +20,9 @@ import { EmpresaModel } from './empresa-model';
 })
 export class RutaModel extends Model {
   @Column({
-    type: DataType.STRING,
-    autoIncrement: false,
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4, // Usa UUIDv4 para generar un ID aleatorio
     primaryKey: true,
-    unique: true,
-    allowNull: false,
   })
   id_ruta!: string;
 
@@ -49,9 +47,7 @@ export class RutaModel extends Model {
 
   @ForeignKey(() => EmpresaModel)
   @Column({
-    type: DataType.STRING,
-    autoIncrement: false,
-    allowNull: false,
+    type: DataType.UUID,
   })
   id_empresa!: string;
 
@@ -69,4 +65,11 @@ export class RutaModel extends Model {
     allowNull: false,
   })
   colorhex!: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+    defaultValue: 'Activa',
+  })
+  estado!: string;
 }

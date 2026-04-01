@@ -10,11 +10,9 @@ export class EmpresaModel extends Model {
   rutas!: RutaModel[];
 
   @Column({
-    type: DataType.STRING,
-    autoIncrement: false,
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4, // Usa UUIDv4 para generar un ID aleatorio
     primaryKey: true,
-    unique: true,
-    allowNull: false,
   })
   id_empresa!: string;
 
@@ -23,7 +21,7 @@ export class EmpresaModel extends Model {
     allowNull: false,
     unique: true,
   })
-  nombre!: string;
+  nombre_empresa!: string;
 
   @Column({
     type: DataType.STRING,
@@ -34,14 +32,14 @@ export class EmpresaModel extends Model {
 
   @Column({
     type: DataType.STRING,
-    allowNull: true,
+    allowNull: false,
     unique: true,
   })
   telefono!: string;
 
   @Column({
     type: DataType.STRING,
-    allowNull: true,
+    allowNull: false,
     unique: true,
   })
   correo!: string;
