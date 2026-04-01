@@ -1,7 +1,22 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  BelongsTo,
+  ForeignKey,
+} from 'sequelize-typescript';
+import { EmpresaModel } from './empresa-model';
 @Table({
   tableName: 'ruta',
-  timestamps: false,
+  timestamps: true,
+  indexes: [
+    {
+      name: 'idx_rutas_coordenadas',
+      using: 'gist',
+      fields: ['coordenadas'],
+    },
+  ],
 })
 export class RutaModel extends Model {
   @Column({
@@ -32,12 +47,16 @@ export class RutaModel extends Model {
   })
   descripcion!: string;
 
-  // @Column({
-  //   type: DataType.STRING,
-  //   autoIncrement: false,
-  //   allowNull: false,
-  // })
-  // id_empresa!: string;
+  @ForeignKey(() => EmpresaModel)
+  @Column({
+    type: DataType.STRING,
+    autoIncrement: false,
+    allowNull: false,
+  })
+  id_empresa!: string;
+
+  @BelongsTo(() => EmpresaModel, { as: 'empresa' })
+  empresa!: EmpresaModel;
 
   @Column({
     type: DataType.GEOMETRY('LINESTRING', 4326), // SRID para GPS
@@ -49,8 +68,5 @@ export class RutaModel extends Model {
     type: DataType.STRING,
     allowNull: false,
   })
-  colorHex!: string;
+  colorhex!: string;
 }
-// asociación con llave foranea ejemplo
-// empresa_transporte.hasMany(ruta, { foreignKey: "id_empresa" });
-// ruta.belongsTo(empresa_transporte, { foreignKey: "id_ruta" });
