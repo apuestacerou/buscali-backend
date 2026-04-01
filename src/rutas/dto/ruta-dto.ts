@@ -212,11 +212,9 @@ export class RutaResponseDTO {
     this.nombre = ruta.nombre_ruta;
     this.destino = ruta.destino;
     this.descripcion = ruta.descripcion;
-    this.coordenadas = ruta.coordenadas;
-    // // this.nombre_empresa = ruta.empresa
-    //   ? ruta.empresa.nombre_empresa
-    //   : 'Empresa no encontrada';
+    this.nombre_empresa = ruta.empresa?.nombre_empresa || ''; // Asignamos el nombre de la empresa desde la relación
     this.colorhex = ruta.colorhex;
     this.estado = ruta.estado;
+    this.coordenadas = ruta.coordenadas;
   }
 }

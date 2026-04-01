@@ -5,8 +5,14 @@ import {
   DataType,
   BelongsTo,
   ForeignKey,
+  DefaultScope,
 } from 'sequelize-typescript';
 import { EmpresaModel } from './empresa-model';
+@DefaultScope(() => ({
+  include: [
+    { model: EmpresaModel, as: 'empresa', attributes: ['nombre_empresa'] }, // Incluimos el nombre de la empresa en el resultado de las consultas
+  ],
+}))
 @Table({
   tableName: 'ruta',
   timestamps: true,

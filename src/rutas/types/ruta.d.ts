@@ -3,7 +3,7 @@ export interface Ruta {
   nombre_ruta: string;
   destino: string;
   descripcion: string;
-  nombre_empresa?: string; // esto llega por un join y se inserta en el dto de respuesta
+  empresa?: { nombre_empresa: string }; // esto llega por un join y se inserta en el dto de respuesta
   estado: string;
   // Estructura GeoJSON real que devuelve PostGIS
   // El formato GeoJSON estándar para LineString
