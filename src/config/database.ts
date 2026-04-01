@@ -5,6 +5,7 @@ import { EmpresaModel } from '../rutas/models/empresa-model';
 
 const sequelize = new Sequelize(process.env.DATABASE_URL!, {
   dialect: 'postgres',
+  timezone: process.env.TIMEZONE,
   dialectOptions: {
     ssl: {
       require: true,
