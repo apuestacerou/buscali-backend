@@ -29,17 +29,11 @@ const app = express();
 // Middleware's
 app.use(express.json());
 
-//array de direcciones permitidas
-const allowedOrigins = [
-  'https://buscali.netlify.app', // producción
-  'http://localhost:3000', // desarrollo local
-];
-
 //middleware CORS solo permite peticiones desde produccion, local y peticiones como postman
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || process.env.ALLOWED_ORIGINS?.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error('No permitido por CORS'));
