@@ -197,8 +197,7 @@ export class UpdateRutaDTO {
   estado?: string;
 }
 
-// DTO para respuesta al ruta
-//TODO: conseguir el nombre de la empresa
+// DTO para respuesta de la ruta. Incluye el nombre de la empresa a través de un join en el modelo
 export class RutaResponseDTO {
   nombre?: string;
   destino?: string;

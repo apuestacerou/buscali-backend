@@ -44,3 +44,4 @@ export class EmpresaModel extends Model {
   })
   correo!: string;
 }
+//cambiar de carpeta a src/empresas/models/empresa-model.ts
