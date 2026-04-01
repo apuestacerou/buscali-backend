@@ -2,15 +2,16 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
+    "typeRoots": ["./conductores-src/types", "./node_modules/@types"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "conductores-src",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*", "docs/**/*"],
+  "include": ["conductores-src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
