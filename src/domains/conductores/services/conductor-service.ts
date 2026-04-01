@@ -6,7 +6,10 @@ import {
   ConductorResponseDTO,
   ConductorLoginDTO,
 } from '../dto/conductor-dto';
-import { ConflictError, ValidationError } from '../../errors/error.class';
+import {
+  ConflictError,
+  ValidationError,
+} from '../../../shared/errors/error.class';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 

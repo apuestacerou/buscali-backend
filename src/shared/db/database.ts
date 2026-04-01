@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize-typescript';
-import { ConductorModel } from '../conductores/models/conductor-model';
-import { RutaModel } from '../rutas/models/ruta-model';
-import { EmpresaModel } from '../rutas/models/empresa-model';
+import { ConductorModel } from './models/conductor-model';
+import { RutaModel } from './models/ruta-model';
+import { EmpresaModel } from './models/empresa-model';
 
 const sequelize = new Sequelize(process.env.DATABASE_URL!, {
   dialect: 'postgres',

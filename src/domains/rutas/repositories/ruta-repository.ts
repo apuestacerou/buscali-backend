@@ -1,8 +1,8 @@
 import { Ruta } from '../types/ruta';
-import { RutaModel } from '../models/ruta-model';
-import { EmpresaModel } from '../models/empresa-model';
+import { RutaModel } from '../../../shared/db/models/ruta-model';
+import { EmpresaModel } from '../../../shared/db/models/empresa-model';
 import { Op } from 'sequelize';
-import { sequelize } from '../../config/database';
+import { sequelize } from '../../../shared/db/database';
 
 // TODO: como es mas facil para el admin buscar por nombre_ruta, destino o empresa y para no comprometer la id de las rutas, el sistema debe hacer la busqueda con los metodos siguientes y recuperar la id para hacer delete o put
 export class RutaRepository {

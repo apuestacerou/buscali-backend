@@ -1,7 +1,10 @@
 import { RutaRepository } from '../repositories/ruta-repository';
 import { Ruta } from '../types/ruta';
 import { CreateRutaDTO, UpdateRutaDTO, RutaResponseDTO } from '../dto/ruta-dto';
-import { ConflictError, ValidationError } from '../../errors/error.class';
+import {
+  ConflictError,
+  ValidationError,
+} from '../../../shared/errors/error.class';
 
 export class RutaService {
   private repo = new RutaRepository();

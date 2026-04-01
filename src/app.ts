@@ -1,16 +1,16 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
-import conductorRouter from './conductores/routers/conductor-router';
-import rutasRouter from './rutas/routers/rutas-router';
+import conductorRouter from './domains/conductores/routers/conductor-router';
+import rutasRouter from './domains/rutas/routers/rutas-router';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
-import { sequelize } from './config/database';
+import { sequelize } from './shared/db/database';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 //middleware's
-import { jwtAuth } from './middlewares/jwtAuth';
-import { errorHandler } from './middlewares/errorHandler';
+import { jwtAuth } from './shared/middlewares/jwtAuth';
+import { errorHandler } from './shared/middlewares/errorHandler';
 
 async function bootstrap() {
   try {
@@ -52,9 +52,6 @@ app.use(
 
 // mmiddleware cookie-parser para usar cookies
 app.use(cookieParser());
-
-//middleware para verificar el jwt
-app.use(jwtAuth);
 
 // Ruta de la documentación Swagger apuntada al archivo YAML en su ubicacion despues de compilar a dist/docs
 const swaggerDocument = YAML.load('./src/api-docs/conductores.yaml');

@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { RutaService } from '../services/ruta-service';
 import { CreateRutaDTO, UpdateRutaDTO } from '../dto/ruta-dto';
 import { plainToInstance } from 'class-transformer';
-import { checkDto } from '../../errors/error.class';
-import { sendSuccess } from '../../utils/sendSuccess';
+import { checkDto } from '../../../shared/utils/checkDTO';
+import { sendSuccess } from '../../../shared/utils/sendSuccess';
 
 const service = new RutaService();
 

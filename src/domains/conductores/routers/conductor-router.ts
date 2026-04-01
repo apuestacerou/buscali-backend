@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { jwtAuth } from '../../middlewares/jwtAuth';
-import { requireAuth } from '../../middlewares/requireAuth';
+import { jwtAuth } from '../../../shared/middlewares/jwtAuth';
+import { requireAuth } from '../../../shared/middlewares/requireAuth';
 import {
   listConductores,
   getConductor,

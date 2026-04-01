@@ -6,8 +6,8 @@ import {
   ConductorLoginDTO,
 } from '../dto/conductor-dto';
 import { plainToInstance } from 'class-transformer';
-import { checkDto } from '../../errors/error.class';
-import { sendSuccess } from '../../utils/sendSuccess';
+import { checkDto } from '../../../shared/utils/checkDTO';
+import { sendSuccess } from '../../../shared/utils/sendSuccess';
 
 const service = new ConductorService();
 
