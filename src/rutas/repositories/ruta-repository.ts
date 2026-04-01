@@ -1,5 +1,6 @@
 import { Ruta } from '../types/ruta';
 import { RutaModel } from '../models/ruta-model';
+import { EmpresaModel } from '../models/empresa-model';
 import { Op } from 'sequelize';
 import { sequelize } from '../../config/database';
 
@@ -41,6 +42,12 @@ export class RutaRepository {
   async findRutaByCoordenadas(coordenadas: string): Promise<Ruta | null> {
     const ruta = await RutaModel.findOne({ where: { coordenadas } });
     return ruta ? (ruta.toJSON() as Ruta) : null;
+  }
+
+  //desacoplar
+  async findEmpresaByNombre(nombre_empresa: string): Promise<string | null> {
+    const empresa = await EmpresaModel.findOne({ where: { nombre_empresa } });
+    return empresa ? empresa.id_empresa : null;
   }
 
   async findDuplicateRoute(id_empresa: string, geoJson: any) {

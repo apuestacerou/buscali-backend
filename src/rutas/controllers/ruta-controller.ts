@@ -20,7 +20,7 @@ export async function listRuta(
     next(error);
   }
 }
-// Obtener conductor por ID
+// Obtener ruta por ID
 // export async function getRuta(
 //   req: Request,
 //   res: Response,
@@ -34,7 +34,7 @@ export async function listRuta(
 //     next(error);
 //   }
 // }
-// Crear un nuevo conductor
+// Crear una nueva ruta
 export async function createRuta(
   req: Request,
   res: Response,
@@ -54,8 +54,8 @@ export async function createRuta(
     next(error);
   }
 }
-// Actualizar un conductor existente
-// export async function updateConductor(
+// Actualizar una ruta existente
+// export async function updateRuta(
 //   req: Request,
 //   res: Response,
 //   next: NextFunction,

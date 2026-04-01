@@ -32,6 +32,14 @@ export class RutaService {
     //valida que no exista un ruta con la misma nombre_ruta
     const errors: string[] = [];
 
+    const empresa_ruta = await this.repo.findEmpresaByNombre(
+      dto.nombre_empresa,
+    );
+
+    if (!empresa_ruta) {
+      errors.push(`La empresa ${dto.nombre_empresa} no existe.`);
+    }
+
     // transformar al formato GeoJSON antes de guardar en PostGIS:
     const geoJson = {
       type: 'LineString' as const,
@@ -39,6 +47,8 @@ export class RutaService {
         (p) => [p.lng, p.lat] as [number, number],
       ),
     };
+
+    dto.id_empresa = empresa_ruta as string; // asigna el id_empresa encontrado al DTO
 
     const existing_ruta = await this.repo.findDuplicateRoute(
       dto.id_empresa,

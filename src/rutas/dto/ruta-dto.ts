@@ -89,12 +89,13 @@ export class CreateRutaDTO {
   nombre_empresa!: string;
 
   //posible solucion
-  // @IsString({ message: 'El ID de la empresa debe ser una cadena de texto' })
-  // @IsNotEmpty({ message: 'El ID de la empresa no puede estar vacío' })
-  // @Matches(/^(?!\s*$).+/, {
-  //   message: 'El ID de la Empresa no puede ser solo espacios',
-  // })
-  // id_empresa!: string; // Usamos ID en el DTO, el nombre se obtiene con un Join después
+  @IsOptional() // Permite que el campo sea opcional al crear un ruta
+  @IsString({ message: 'El ID de la empresa debe ser una cadena de texto' })
+  @IsNotEmpty({ message: 'El ID de la empresa no puede estar vacío' })
+  @Matches(/^(?!\s*$).+/, {
+    message: 'El ID de la Empresa no puede ser solo espacios',
+  })
+  id_empresa!: string; // Usamos ID en el DTO, el nombre se obtiene con un Join después
 
   @IsArray()
   @ArrayMinSize(2, {
