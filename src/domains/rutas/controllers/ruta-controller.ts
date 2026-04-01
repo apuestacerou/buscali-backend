@@ -21,19 +21,15 @@ export async function listRuta(
   }
 }
 // Obtener ruta por ID
-// export async function getRuta(
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) {
-//   try {
-//     const cedula = req.params.cedula;
-//     const conductor = await service.get(cedula);
-//     return sendSuccess(res, 200, 'Conductor encontrado', conductor);
-//   } catch (error) {
-//     next(error);
-//   }
-// }
+export async function getRuta(req: Request, res: Response, next: NextFunction) {
+  try {
+    const nombreRuta = req.params.nombre_ruta;
+    const ruta = await service.get(nombreRuta);
+    return sendSuccess(res, 200, 'Ruta encontrada', ruta);
+  } catch (error) {
+    next(error);
+  }
+}
 // Crear una nueva ruta
 export async function createRuta(
   req: Request,

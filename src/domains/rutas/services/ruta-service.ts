@@ -20,15 +20,15 @@ export class RutaService {
   }
 
   //obtener ruta por nombre_ruta
-  // async get(nombre_ruta: string): Promise<RutaResponseDTO | null> {
-  //   const ruta: Ruta | null = await this.repo.findRutaByNombre(nombre_ruta);
-  //   //verifica si el ruta existe, si no existe lanza un error
-  //   if (!ruta) {
-  //     throw new ValidationError('Ruta no encontrado');
-  //   }
+  async get(nombreRuta: string): Promise<RutaResponseDTO | null> {
+    const ruta: Ruta | null = await this.repo.findRutaByNombre(nombreRuta);
+    //verifica si la ruta existe, si no existe lanza un error
+    if (!ruta) {
+      throw new ValidationError('Ruta no encontrada');
+    }
 
-  //   return ruta ? new RutaResponseDTO(ruta) : null;
-  // }
+    return ruta ? new RutaResponseDTO(ruta) : null;
+  }
 
   //crear ruta
   async create(dto: CreateRutaDTO): Promise<RutaResponseDTO> {

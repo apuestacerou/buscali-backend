@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import conductorRouter from './domains/conductores/routers/conductor-router';
-import rutasRouter from './domains/rutas/routers/rutas-router';
+import rutasRouter from './domains/rutas/routers/ruta-router';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import { sequelize } from './shared/db/database';
