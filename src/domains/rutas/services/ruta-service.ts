@@ -30,6 +30,30 @@ export class RutaService {
     return ruta ? new RutaResponseDTO(ruta) : null;
   }
 
+  async getByEmpresa(nombreEmpresa: string): Promise<RutaResponseDTO | null> {
+    const id_empresa: string | null =
+      await this.repo.findEmpresaByNombre(nombreEmpresa);
+    //verifica si la ruta existe, si no existe lanza un error
+    if (!id_empresa) {
+      throw new ValidationError('Ruta no encontrada para esta empresa');
+    }
+    const ruta: Ruta | null = await this.repo.findRutaByEmpresa(id_empresa);
+    if (!ruta) {
+      throw new ValidationError('Ruta no encontrada para esta empresa');
+    }
+
+    return new RutaResponseDTO(ruta);
+  }
+
+  async getByDestino(destino: string): Promise<RutaResponseDTO | null> {
+    const ruta: Ruta | null = await this.repo.findRutaByDestino(destino);
+    //verifica si la ruta existe, si no existe lanza un error
+    if (!ruta) {
+      throw new ValidationError('Ruta no encontrada para este destino');
+    }
+    return new RutaResponseDTO(ruta);
+  }
+
   //crear ruta
   async create(dto: CreateRutaDTO): Promise<RutaResponseDTO> {
     //valida que no exista un ruta con la misma nombre_ruta

@@ -3,6 +3,7 @@ import { RutaModel } from '../../../shared/db/models/ruta-model';
 import { EmpresaModel } from '../../../shared/db/models/empresa-model';
 import { Op } from 'sequelize';
 import { sequelize } from '../../../shared/db/database';
+import { WhereOptions } from 'sequelize/types/model';
 
 // TODO: como es mas facil para el admin buscar por nombre_ruta, destino o empresa y para no comprometer la id de las rutas, el sistema debe hacer la busqueda con los metodos siguientes y recuperar la id para hacer delete o put
 export class RutaRepository {
@@ -13,36 +14,32 @@ export class RutaRepository {
     return rutas.map((c) => c.toJSON() as Ruta);
   }
 
+  private async findRuta(where: WhereOptions<RutaModel>): Promise<Ruta | null> {
+    const ruta = await RutaModel.findOne({ where });
+    return ruta ? (ruta.toJSON() as Ruta) : null;
+  }
+
   //obtener rutas por nombre_ruta, destino o empresa usando los index de la db
   // sirven para la verificacion de existencia en la base de datos para evitar duplicados o mejorar la busqueda
-  //nombre_ruta
-  async findRutaById(id_ruta: string): Promise<Ruta | null> {
-    const ruta = await RutaModel.findByPk(id_ruta);
-    return ruta ? (ruta.toJSON() as Ruta) : null;
-  }
-  //nombre_ruta
+  // id_ruta
+  // async findRutaById(id_ruta: string): Promise<Ruta | null> {
+  //   return this.findRuta({ id_ruta });
+  // }
+  // nombre_ruta
   async findRutaByNombre(nombre_ruta: string): Promise<Ruta | null> {
-    const ruta = await RutaModel.findOne({
-      where: { nombre_ruta },
-    });
-    return ruta ? (ruta.toJSON() as Ruta) : null;
+    return this.findRuta({ nombre_ruta });
   }
-  //Destino
+  // Destino
   async findRutaByDestino(destino: string): Promise<Ruta | null> {
-    const ruta = await RutaModel.findOne({
-      where: { destino },
-    });
-    return ruta ? (ruta.toJSON() as Ruta) : null;
+    return this.findRuta({ destino });
   }
-  // empresa
+  // id_empresa
   async findRutaByEmpresa(id_empresa: string): Promise<Ruta | null> {
-    const ruta = await RutaModel.findOne({ where: { id_empresa } });
-    return ruta ? (ruta.toJSON() as Ruta) : null;
+    return this.findRuta({ id_empresa });
   }
-  //coordenadas
+  // coordenadas
   async findRutaByCoordenadas(coordenadas: string): Promise<Ruta | null> {
-    const ruta = await RutaModel.findOne({ where: { coordenadas } });
-    return ruta ? (ruta.toJSON() as Ruta) : null;
+    return this.findRuta({ coordenadas });
   }
 
   //desacoplar

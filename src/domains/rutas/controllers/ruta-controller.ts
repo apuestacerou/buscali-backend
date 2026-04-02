@@ -20,7 +20,7 @@ export async function listRuta(
     next(error);
   }
 }
-// Obtener ruta por ID
+// Obtener ruta por Nombre de la ruta
 export async function getRuta(req: Request, res: Response, next: NextFunction) {
   try {
     const nombreRuta = req.params.nombre_ruta;
@@ -30,6 +30,35 @@ export async function getRuta(req: Request, res: Response, next: NextFunction) {
     next(error);
   }
 }
+//obtener ruta por nombre de la empresa
+export async function getRutaByEmpresa(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const nombreEmpresa = req.params.nombre_empresa;
+    const ruta = await service.getByEmpresa(nombreEmpresa);
+    return sendSuccess(res, 200, 'Ruta encontrada', ruta);
+  } catch (error) {
+    next(error);
+  }
+}
+//obtener ruta por destino
+export async function getRutaByDestino(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const destino = req.params.destino;
+    const ruta = await service.getByDestino(destino);
+    return sendSuccess(res, 200, 'Ruta encontrada', ruta);
+  } catch (error) {
+    next(error);
+  }
+}
+
 // Crear una nueva ruta
 export async function createRuta(
   req: Request,
