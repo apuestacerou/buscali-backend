@@ -48,7 +48,7 @@ app.use(
 app.use(cookieParser());
 
 // Ruta de la documentación Swagger apuntada al archivo YAML en su ubicacion despues de compilar a dist/docs
-const swaggerDocument = YAML.load('./src/api-docs/conductores.yaml');
+const swaggerDocument = YAML.load('./src/apis/apis.yaml');
 
 // Health check
 app.get('/health', (_req, res) =>
