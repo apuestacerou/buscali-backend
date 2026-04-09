@@ -42,6 +42,14 @@ export class Usuario extends Model {
   })
   declare nombre: string;
 
+  /** Apellido del usuario. Obligatorio, máximo 120 caracteres */
+  @Column({
+    type: DataType.STRING(120),
+    allowNull: false,
+    defaultValue: '',
+  })
+  declare apellido: string;
+
   /** Email. Opcional (allowNull: true), máximo 255 caracteres */
   @Column({
     type: DataType.STRING(255),

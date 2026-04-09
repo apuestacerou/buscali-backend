@@ -54,13 +54,14 @@ export async function obtenerPorId(req: Request, res: Response): Promise<void> {
 
 /**
  * POST /api/usuarios - Crear un nuevo usuario.
- * Body: nombre (obligatorio), password (obligatorio, mínimo 6 caracteres), email, telefono, rol (opcionales).
+ * Body: nombre, apellido, teléfono y password (obligatorios); email y rol opcionales.
  * La contraseña se hashea con bcrypt antes de guardar.
  */
 export async function crear(req: Request, res: Response): Promise<void> {
   try {
-    const { nombre, email, telefono, password, rol } = req.body as {
+    const { nombre, apellido, email, telefono, password, rol } = req.body as {
       nombre?: string;
+      apellido?: string;
       email?: string;
       telefono?: string;
       password?: string;
@@ -70,8 +71,21 @@ export async function crear(req: Request, res: Response): Promise<void> {
       res.status(400).json({ error: 'El campo nombre es obligatorio' });
       return;
     }
+    if (!apellido || typeof apellido !== 'string' || apellido.trim() === '') {
+      res.status(400).json({ error: 'El campo apellido es obligatorio' });
+      return;
+    }
     if (!password || typeof password !== 'string' || password.length < 6) {
       res.status(400).json({ error: 'La contraseña es obligatoria y debe tener al menos 6 caracteres' });
+      return;
+    }
+    if (!telefono || typeof telefono !== 'string' || telefono.trim() === '') {
+      res.status(400).json({ error: 'El campo teléfono es obligatorio' });
+      return;
+    }
+    const tel = String(telefono).trim();
+    if (tel.length > 20) {
+      res.status(400).json({ error: 'El teléfono admite máximo 20 caracteres' });
       return;
     }
     const pwd = password as string;
@@ -83,8 +97,9 @@ export async function crear(req: Request, res: Response): Promise<void> {
     const passwordHash = await bcrypt.hash(pwd, SALT_ROUNDS);
     const usuario = await Usuario.create({
       nombre: nombre.trim(),
+      apellido: apellido.trim(),
       email: email != null ? String(email).trim() || null : null,
-      telefono: telefono != null ? String(telefono).trim() || null : null,
+      telefono: tel,
       passwordHash,
       rol: rolValido,
     });
@@ -99,7 +114,7 @@ export async function crear(req: Request, res: Response): Promise<void> {
 
 /**
  * PUT /api/usuarios/:id - Actualizar un usuario existente.
- * Solo se actualizan los campos que vengan en el body (nombre, email, telefono, password, rol).
+ * Solo se actualizan los campos que vengan en el body (nombre, apellido, email, telefono, password, rol).
  */
 export async function actualizar(req: Request, res: Response): Promise<void> {
   try {
@@ -113,14 +128,16 @@ export async function actualizar(req: Request, res: Response): Promise<void> {
       res.status(404).json({ error: 'Usuario no encontrado' });
       return;
     }
-    const { nombre, email, telefono, password, rol } = req.body as {
+    const { nombre, apellido, email, telefono, password, rol } = req.body as {
       nombre?: string;
+      apellido?: string;
       email?: string;
       telefono?: string;
       password?: string;
       rol?: string;
     };
     if (nombre !== undefined) usuario.nombre = String(nombre).trim();
+    if (apellido !== undefined) usuario.apellido = String(apellido).trim();
     if (email !== undefined) usuario.email = email === '' ? null : String(email).trim();
     if (telefono !== undefined) usuario.telefono = telefono === '' ? null : String(telefono).trim();
     if (rol !== undefined && ['pasajero', 'conductor', 'administrador'].includes(rol)) {

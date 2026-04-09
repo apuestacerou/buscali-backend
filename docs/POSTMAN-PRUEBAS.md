@@ -27,11 +27,15 @@ Base URL: **http://localhost:3000**
 
 **POST** `http://localhost:3000/api/usuarios`  
 **Headers:** `Content-Type: application/json`  
+
+Campos obligatorios: `nombre`, `apellido`, `telefono`, `password` (mínimo 6 caracteres). Opcionales: `email`, `rol`.
+
 **Body (raw, JSON):**
 
 ```json
 {
-  "nombre": "Usuario Prueba",
+  "nombre": "Usuario",
+  "apellido": "Prueba",
   "email": "prueba@buscali.com",
   "telefono": "3001234567",
   "password": "clave123",
@@ -43,7 +47,35 @@ Base URL: **http://localhost:3000**
 
 ---
 
-## 4. Listar de nuevo (confirmar que se guardó)
+## 4. Iniciar sesión (validar correo/teléfono y contraseña)
+
+**POST** `http://localhost:3000/api/auth/login`  
+**Headers:** `Content-Type: application/json`  
+
+**Body (raw, JSON):** `identificador` = correo (con `@`) **o** teléfono guardado al registrarse; `password` = la misma clave usada al crear el usuario.
+
+```json
+{
+  "identificador": "prueba@buscali.com",
+  "password": "clave123"
+}
+```
+
+O solo con teléfono:
+
+```json
+{
+  "identificador": "3001234567",
+  "password": "clave123"
+}
+```
+
+- **Esperado:** Status 200, body con el usuario (sin `passwordHash`).
+- Credenciales incorrectas: Status **401**, `{ "error": "Credenciales incorrectas" }`.
+
+---
+
+## 5. Listar de nuevo (confirmar que se guardó)
 
 **GET** `http://localhost:3000/api/usuarios`
 
@@ -51,7 +83,7 @@ Base URL: **http://localhost:3000**
 
 ---
 
-## 5. Otras pruebas opcionales
+## 6. Otras pruebas opcionales
 
 | Método | URL | Descripción |
 |--------|-----|-------------|
