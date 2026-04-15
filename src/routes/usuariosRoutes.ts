@@ -7,11 +7,12 @@
 import { Router } from 'express';
 import * as usuariosController from '../controllers/usuariosController';
 import { authMiddleware } from '../middleware/auth';
+import { registerLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
 // Rutas públicas (sin autenticación)
-router.post('/', usuariosController.crear);
+router.post('/', registerLimiter, usuariosController.crear);
 
 // Rutas protegidas (requieren JWT)
 router.get('/', authMiddleware, usuariosController.listar);

@@ -4,10 +4,11 @@
 
 import { Router } from 'express';
 import * as authController from '../controllers/authController';
+import { loginLimiter, passwordStrengthLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
-router.post('/login', authController.login);
-router.get('/password-strength', authController.getPasswordStrength);
+router.post('/login', loginLimiter, authController.login);
+router.get('/password-strength', passwordStrengthLimiter, authController.getPasswordStrength);
 
 export default router;
