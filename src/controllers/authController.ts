@@ -107,6 +107,79 @@ export async function getPasswordStrength(req: Request, res: Response): Promise<
 }
 
 /**
+ * POST /api/auth/password-strength
+ * Body: { password }
+ * Versión segura de evaluación de contraseña (sin exponer en query string)
+ * Recomendado para aplicaciones críticas
+ */
+export async function postPasswordStrength(req: Request, res: Response): Promise<void> {
+  try {
+    const { password } = req.body as { password?: string };
+
+    if (!password || typeof password !== 'string') {
+      res.status(400).json({
+        error: 'La contraseña es obligatoria en el body',
+        example: { password: 'MiContraseña123!' },
+      });
+      return;
+    }
+
+    const validation = validatePassword(password);
+    const strengthInfo = getStrengthInfo(validation.strength);
+
+    res.json({
+      length: password.length,
+      strength: validation.strength,
+      isValid: validation.isValid,
+      strengthInfo,
+      requirements: validation.score,
+      errors: validation.errors,
+      suggestions: validation.suggestions,
+      // Información adicional de seguridad
+      entropyEstimate: calculateEntropyEstimate(password),
+      crackTimeEstimate: estimateCrackTime(validation.strength),
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error al evaluar la fortaleza de la contraseña' });
+  }
+}
+
+/**
+ * Calcula una estimación de entropía de la contraseña
+ * Entropía = log2(charset_size ^ length)
+ */
+function calculateEntropyEstimate(password: string): number {
+  let charsetSize = 0;
+
+  if (/[a-z]/.test(password)) charsetSize += 26; // minúsculas
+  if (/[A-Z]/.test(password)) charsetSize += 26; // mayúsculas
+  if (/[0-9]/.test(password)) charsetSize += 10; // números
+  if (/[^a-zA-Z0-9]/.test(password)) charsetSize += 32; // caracteres especiales
+
+  // Entropía = log2(charset_size) * length
+  if (charsetSize === 0) return 0;
+  return Math.log2(charsetSize) * password.length;
+}
+
+/**
+ * Estima el tiempo aproximado para crackear la contraseña
+ * Basado en fuerza bruta a 1 millón de intentos por segundo
+ */
+function estimateCrackTime(strength: number): string {
+  const strengthMap: Record<number, { mins: number; description: string }> = {
+    0: { mins: 0, description: 'Sin contraseña' },
+    1: { mins: 1, description: 'Menos de 1 minuto' },
+    2: { mins: 60, description: 'Aproximadamente 1 hora' },
+    3: { mins: 24 * 60, description: 'Aproximadamente 1 día' },
+    4: { mins: 30 * 24 * 60, description: 'Aproximadamente 1 mes' },
+    5: { mins: 365 * 24 * 60, description: 'Más de 1 año' },
+  };
+
+  return strengthMap[strength]?.description || 'Desconocido';
+}
+
+/**
  * GET /api/auth/password-strength
  * Query: password
  * Devuelve información visual sobre la fortaleza de la contraseña en tiempo real

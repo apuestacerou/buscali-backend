@@ -10,5 +10,6 @@ const router = Router();
 
 router.post('/login', loginLimiter, authController.login);
 router.get('/password-strength', passwordStrengthLimiter, authController.getPasswordStrength);
+router.post('/password-strength', passwordStrengthLimiter, authController.postPasswordStrength);
 
 export default router;
