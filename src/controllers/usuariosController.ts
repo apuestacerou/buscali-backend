@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import { Usuario, RolUsuario } from '../models/Usuario';
 import bcrypt from 'bcrypt';
+import { validatePassword } from '../utils/passwordValidator';
 
 // Vueltas de hashing para bcrypt (a mayor número, más seguro pero más lento)
 const SALT_ROUNDS = 10;
@@ -75,8 +76,19 @@ export async function crear(req: Request, res: Response): Promise<void> {
       res.status(400).json({ error: 'El campo apellido es obligatorio' });
       return;
     }
-    if (!password || typeof password !== 'string' || password.length < 6) {
-      res.status(400).json({ error: 'La contraseña es obligatoria y debe tener al menos 6 caracteres' });
+    if (!password || typeof password !== 'string') {
+      res.status(400).json({ error: 'La contraseña es obligatoria' });
+      return;
+    }
+    
+    // Validar que la contraseña cumpla con requisitos de seguridad
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      res.status(400).json({
+        error: 'La contraseña no cumple con los requisitos de seguridad',
+        details: passwordValidation.errors,
+        suggestions: passwordValidation.suggestions,
+      });
       return;
     }
     if (!telefono || typeof telefono !== 'string' || telefono.trim() === '') {
@@ -144,8 +156,14 @@ export async function actualizar(req: Request, res: Response): Promise<void> {
       usuario.rol = rol as RolUsuario;
     }
     if (password !== undefined && password !== '') {
-      if (password.length < 6) {
-        res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+      // Validar que la contraseña cumpla con requisitos de seguridad
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.isValid) {
+        res.status(400).json({
+          error: 'La contraseña no cumple con los requisitos de seguridad',
+          details: passwordValidation.errors,
+          suggestions: passwordValidation.suggestions,
+        });
         return;
       }
       const pwd = password as string;

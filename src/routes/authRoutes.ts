@@ -8,5 +8,6 @@ import * as authController from '../controllers/authController';
 const router = Router();
 
 router.post('/login', authController.login);
+router.get('/password-strength', authController.getPasswordStrength);
 
 export default router;
