@@ -7,6 +7,7 @@ import { Request, Response } from 'express';
 import { Usuario, RolUsuario } from '../models/Usuario';
 import bcrypt from 'bcrypt';
 import { validatePassword } from '../utils/passwordValidator';
+import { savePasswordHistory, checkPasswordHistoryUsage, cleanOldPasswordHistory } from '../services/passwordHistoryService';
 
 // Vueltas de hashing para bcrypt (a mayor número, más seguro pero más lento)
 const SALT_ROUNDS = 10;
@@ -166,8 +167,25 @@ export async function actualizar(req: Request, res: Response): Promise<void> {
         });
         return;
       }
+
+      // Verificar que no reutilice contraseña reciente
+      const reutilizada = await checkPasswordHistoryUsage(usuario.id, password, 5);
+      if (reutilizada) {
+        res.status(400).json({
+          error: 'No puedes reutilizar una contraseña reciente',
+          suggestion: 'Elige una contraseña diferente a las 5 últimas utilizadas',
+        });
+        return;
+      }
+
+      // Guardar contraseña anterior en historial
+      await savePasswordHistory(usuario.id, usuario.passwordHash);
+
       const pwd = password as string;
       usuario.passwordHash = await bcrypt.hash(pwd, SALT_ROUNDS);
+
+      // Limpiar historial antiguo (mantener últimos 10)
+      await cleanOldPasswordHistory(usuario.id, 10);
     }
     await usuario.save();
     const salida = usuario.toJSON();
