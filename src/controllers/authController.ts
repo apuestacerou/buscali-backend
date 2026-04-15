@@ -7,6 +7,7 @@ import bcrypt from 'bcrypt';
 import { Op } from 'sequelize';
 import { Usuario } from '../models/Usuario';
 import { validatePassword, getStrengthInfo } from '../utils/passwordValidator';
+import { generateToken } from '../middleware/auth';
 import { validatePassword, getStrengthInfo } from '../utils/passwordValidator';
 
 /**
@@ -53,9 +54,17 @@ export async function login(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    // Generar JWT
+    const token = generateToken(usuario.id, usuario.email, usuario.rol);
+
     const salida = usuario.toJSON();
     delete (salida as Record<string, unknown>).passwordHash;
-    res.json(salida);
+    
+    res.json({
+      usuario: salida,
+      token,
+      expiresIn: '7d',
+    });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Error al iniciar sesión' });

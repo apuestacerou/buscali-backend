@@ -6,13 +6,17 @@
 
 import { Router } from 'express';
 import * as usuariosController from '../controllers/usuariosController';
+import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/', usuariosController.listar);
-router.get('/:id', usuariosController.obtenerPorId);
+// Rutas públicas (sin autenticación)
 router.post('/', usuariosController.crear);
-router.put('/:id', usuariosController.actualizar);
-router.delete('/:id', usuariosController.eliminar);
+
+// Rutas protegidas (requieren JWT)
+router.get('/', authMiddleware, usuariosController.listar);
+router.get('/:id', authMiddleware, usuariosController.obtenerPorId);
+router.put('/:id', authMiddleware, usuariosController.actualizar);
+router.delete('/:id', authMiddleware, usuariosController.eliminar);
 
 export default router;
