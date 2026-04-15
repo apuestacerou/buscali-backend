@@ -101,6 +101,28 @@ export async function crear(req: Request, res: Response): Promise<void> {
       res.status(400).json({ error: 'El teléfono admite máximo 20 caracteres' });
       return;
     }
+
+    // Validar que email sea único (si se proporciona)
+    if (email) {
+      const emailStr = String(email).trim().toLowerCase();
+      const existingEmail = await Usuario.findOne({
+        where: { email: { [Op.iLike]: emailStr } },
+      });
+      if (existingEmail) {
+        res.status(409).json({ error: 'El email ya está registrado' });
+        return;
+      }
+    }
+
+    // Validar que teléfono sea único
+    const existingPhone = await Usuario.findOne({
+      where: { telefono: tel },
+    });
+    if (existingPhone) {
+      res.status(409).json({ error: 'El teléfono ya está registrado' });
+      return;
+    }
+
     const pwd = password as string;
     // Si el rol viene en el body y es válido, lo usamos; si no, por defecto "pasajero"
     const rolValido: RolUsuario = ['pasajero', 'conductor', 'administrador'].includes(rol ?? '')
@@ -218,5 +240,60 @@ export async function eliminar(req: Request, res: Response): Promise<void> {
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Error al eliminar usuario' });
+  }
+}
+
+/**
+ * GET /api/usuarios/check/availability
+ * Verifica la disponibilidad de un email o teléfono
+ * Query: email o telefono
+ */
+export async function checkAvailability(req: Request, res: Response): Promise<void> {
+  try {
+    const { email, telefono } = req.query as { email?: string; telefono?: string };
+
+    if (!email && !telefono) {
+      res.status(400).json({
+        error: 'Debes proporcionar email o telefono como parámetro de consulta',
+        example: '/api/usuarios/check/availability?email=usuario@example.com',
+      });
+      return;
+    }
+
+    const availability: {
+      email?: { available: boolean; message: string };
+      telefono?: { available: boolean; message: string };
+    } = {};
+
+    // Verificar email
+    if (email) {
+      const emailStr = String(email).trim().toLowerCase();
+      const existingEmail = await Usuario.findOne({
+        where: { email: { [Op.iLike]: emailStr } },
+      });
+
+      availability.email = {
+        available: !existingEmail,
+        message: existingEmail ? 'Email ya está registrado' : 'Email disponible',
+      };
+    }
+
+    // Verificar teléfono
+    if (telefono) {
+      const telefonoStr = String(telefono).trim();
+      const existingPhone = await Usuario.findOne({
+        where: { telefono: telefonoStr },
+      });
+
+      availability.telefono = {
+        available: !existingPhone,
+        message: existingPhone ? 'Teléfono ya está registrado' : 'Teléfono disponible',
+      };
+    }
+
+    res.json(availability);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error al verificar disponibilidad' });
   }
 }

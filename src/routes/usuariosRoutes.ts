@@ -13,6 +13,7 @@ const router = Router();
 
 // Rutas públicas (sin autenticación)
 router.post('/', registerLimiter, usuariosController.crear);
+router.get('/check/availability', usuariosController.checkAvailability);
 
 // Rutas protegidas (requieren JWT)
 router.get('/', authMiddleware, usuariosController.listar);
