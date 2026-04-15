@@ -7,6 +7,7 @@ import bcrypt from 'bcrypt';
 import { Op } from 'sequelize';
 import { Usuario } from '../models/Usuario';
 import { validatePassword, getStrengthInfo } from '../utils/passwordValidator';
+import { validatePassword, getStrengthInfo } from '../utils/passwordValidator';
 
 /**
  * POST /api/auth/login
@@ -58,6 +59,41 @@ export async function login(req: Request, res: Response): Promise<void> {
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Error al iniciar sesión' });
+  }
+}
+
+/**
+ * GET /api/auth/password-strength
+ * Query: password
+ * Devuelve información visual sobre la fortaleza de la contraseña en tiempo real
+ */
+export async function getPasswordStrength(req: Request, res: Response): Promise<void> {
+  try {
+    const { password } = req.query as { password?: string };
+
+    if (!password || typeof password !== 'string') {
+      res.status(400).json({
+        error: 'La contraseña es obligatoria como parámetro de consulta',
+        example: '/api/auth/password-strength?password=MiContraseña123!',
+      });
+      return;
+    }
+
+    const validation = validatePassword(password);
+    const strengthInfo = getStrengthInfo(validation.strength);
+
+    res.json({
+      password: '*'.repeat(password.length), // Ocultar contraseña real
+      strength: validation.strength,
+      isValid: validation.isValid,
+      strengthInfo,
+      requirements: validation.score,
+      errors: validation.errors,
+      suggestions: validation.suggestions,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error al evaluar la fortaleza de la contraseña' });
   }
 }
 
