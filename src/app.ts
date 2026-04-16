@@ -27,6 +27,10 @@ bootstrap();
 
 const app = express();
 
+// Configurar Express para devolver JSON formateado (pretty print)
+// 2 espacios de indentación para mejor legibilidad
+app.set('json spaces', 2);
+
 // Middleware's
 app.use(express.json());
 
