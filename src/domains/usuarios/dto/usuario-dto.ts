@@ -1,12 +1,14 @@
-import { IsBoolean, IsEmail, IsEnum, IsOptional, Matches } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, Matches } from 'class-validator';
 import { Usuario } from '../types/usuario';
 
 export class CreateUsuarioDTO {
+  @IsNotEmpty({ message: 'Nombre es requerido' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,60}$/, {
     message: 'Nombre solo puede contener letras y espacios',
   })
   nombre!: string;
 
+  @IsNotEmpty({ message: 'Apellido es requerido' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,60}$/, {
     message: 'Apellido solo puede contener letras y espacios',
   })
