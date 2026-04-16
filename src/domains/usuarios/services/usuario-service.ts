@@ -116,7 +116,7 @@ export class UsuarioService {
     };
 
     const token = jwt.sign({ payload }, process.env.SECRET_JWT_KEY!, {
-      expiresIn: '1h',
+      expiresIn: '2h',
     });
 
     return { token };
