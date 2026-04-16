@@ -63,12 +63,13 @@ app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 app.listen(PORT, () => {
-  console.log(`✓ Conductores service running on http://localhost:${PORT}`);
-  console.log(`  Endpoints:`);
-  console.log(`    conductores    /api/v1/conductores`);
-  console.log(`    usuarios       /api/v1/usuarios`);
-  console.log(`    rutas          /api/v1/rutas`);
-  console.log(`  Swagger docs: http://localhost:${PORT}/api/v1/docs`);
+  console.log(`\n✅ Buscali Backend Service running on http://localhost:${PORT}\n`);
+  console.log(`📍 Available Endpoints:\n`);
+  console.log(`   🚗 POST   /api/v1/conductores          - Conductores Management`);
+  console.log(`   👤 POST   /api/v1/usuarios             - User Registration & Login`);
+  console.log(`   🛣️  GET   /api/v1/rutas                - Routes Management`);
+  console.log(`   📚 GET   /api/v1/docs                  - Swagger Documentation\n`);
+  console.log(`✨ Ready to accept requests!\n`);
 });
 
 //middleware para manejar errores

@@ -12,6 +12,7 @@ const sequelize = databaseUrl
   ? new Sequelize(databaseUrl, {
       dialect: 'postgres',
       timezone,
+      logging: false,
       dialectOptions: isSsl
         ? {
             ssl: {
@@ -30,6 +31,7 @@ const sequelize = databaseUrl
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       timezone,
+      logging: false,
       dialectOptions: isSsl
         ? {
             ssl: {
