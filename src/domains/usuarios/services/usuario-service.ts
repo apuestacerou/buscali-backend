@@ -19,14 +19,21 @@ import nodemailer from 'nodemailer';
 export class UsuarioService {
   private repo = new UsuarioRepository();
 
+  /**
+   * Crea un nuevo usuario en el sistema.
+   * Valida que el correo y teléfono no estén duplicados, y que se acepten los términos.
+   * Hashea la contraseña antes de guardar.
+   */
   async create(dto: CreateUsuarioDTO): Promise<UsuarioResponseDTO> {
     const errors: string[] = [];
 
+    // Verificar si el correo ya existe
     const existingCorreo = await this.repo.findUsuarioByCorreo(dto.correo);
     if (existingCorreo) {
       errors.push('Usuario con este correo ya existe');
     }
 
+    // Verificar si el teléfono ya existe (si se proporciona)
     if (dto.telefono) {
       const existingTelefono = await this.repo.findUsuarioByTelefono(
         dto.telefono,
@@ -36,6 +43,7 @@ export class UsuarioService {
       }
     }
 
+    // Validar aceptación de términos
     if (!dto.aceptaTerminos) {
       errors.push('Debe aceptar los términos y condiciones');
     }
@@ -44,8 +52,10 @@ export class UsuarioService {
       throw new ConflictError(errors);
     }
 
+    // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
+    // Crear el usuario en la base de datos
     const usuario = await this.repo.createUsuario({
       nombre: dto.nombre,
       apellido: dto.apellido,
