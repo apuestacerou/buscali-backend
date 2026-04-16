@@ -11,6 +11,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@types/nodemailer": "^8.0.0",
     "axios": "^1.4.0",
     "bcrypt": "^6.0.0",
     "body-parser": "^1.20.2",
@@ -21,6 +22,7 @@
     "dotenv": "^17.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^8.0.5",
     "pg": "^8.11.0",
     "pg-hstore": "^2.3.4",
     "reflect-metadata": "^0.2.2",
