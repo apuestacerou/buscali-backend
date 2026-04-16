@@ -16,7 +16,7 @@ const router = Router();
 // Aplica middlewares y conecta rutas con controladores
 router.get('/', jwtAuth, requireAuth, listConductores);
 router.get('/:cedula', jwtAuth, requireAuth, getConductor);
-router.post('/', jwtAuth, requireAuth, createConductor);
+router.post('/', createConductor); // Registro público
 router.put('/:cedula', jwtAuth, requireAuth, updateConductor);
 router.delete('/:cedula', jwtAuth, requireAuth, deleteConductor);
 router.post('/login', loginConductor);
