@@ -9,6 +9,8 @@ import {
   deleteConductor,
   loginConductor,
   logoutConductor,
+  forgotPassword,
+  resetPassword,
 } from '../controllers/conductor-controller';
 
 const router = Router();
@@ -21,5 +23,7 @@ router.put('/:cedula', jwtAuth, requireAuth, updateConductor);
 router.delete('/:cedula', jwtAuth, requireAuth, deleteConductor);
 router.post('/login', loginConductor);
 router.post('/logout', jwtAuth, requireAuth, logoutConductor);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 export default router;
