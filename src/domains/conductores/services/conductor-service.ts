@@ -69,7 +69,7 @@ export class ConductorService {
 
     //hashea la contraseña antes de guardarla en la base de datos
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(dto.contrasena || '', saltRounds);
+    const hashedPassword = await bcrypt.hash(dto.contrasena, saltRounds);
     dto.contrasena = hashedPassword;
 
     //crea en la db y devuelve el nuevo conductor

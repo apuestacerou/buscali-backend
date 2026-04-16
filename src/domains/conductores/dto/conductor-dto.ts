@@ -17,9 +17,8 @@ export class CreateConductorDTO {
   @Matches(/^\+?[0-9]{7,15}$/, { message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos' }) // Validación para permitir solo dígitos en el teléfono
   telefono!: string;
 
-  @IsOptional() // Permite que el campo sea opcional al crear un conductor
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" }) // Validación para contraseñas seguras
-  contrasena?: string;
+  contrasena!: string;
 
   @IsBoolean({ message: 'Debe aceptar los términos y condiciones' })
   aceptaTerminos!: boolean;
