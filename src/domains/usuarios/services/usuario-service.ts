@@ -52,8 +52,8 @@ export class UsuarioService {
       throw new ConflictError(errors);
     }
 
-    // Hashear la contraseña
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    // Hashear la contraseña con 12 rounds de salt
+    const hashedPassword = await bcrypt.hash(dto.password, 12);
 
     // Crear el usuario en la base de datos
     const usuario = await this.repo.createUsuario({
