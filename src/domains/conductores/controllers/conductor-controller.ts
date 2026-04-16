@@ -58,10 +58,23 @@ export async function createConductor(
     await checkDto(dto);
 
     const newConductor = await service.create(dto);
+    // Auto login después del registro
+    const loginDto: ConductorLoginDTO = {
+      telefono: dto.telefono,
+      contrasena: dto.contrasena,
+    };
+    const login = await service.login(loginDto);
+    // seteo de cookie segura
+    res.cookie('access_token', login.token, {
+      httpOnly: true, // solo accesible desde el servidor
+      secure: process.env.NODE_ENV === 'production', // solo por https en producción
+      sameSite: 'strict', // solo desde el mismo dominio
+      // maxAge: 1000 * 60 * 60 // opcional: 1 hora
+    });
     return sendSuccess(
       res,
       201,
-      'Conductor creado correctamente',
+      'Conductor registrado y autenticado correctamente',
       newConductor,
     );
   } catch (error) {
