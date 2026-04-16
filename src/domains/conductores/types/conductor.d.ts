@@ -8,4 +8,6 @@ export interface Conductor {
   contrasena: string;
   fecha_creacion: Date;
   estado: string; // campo opcional para indicar el estado del conductor (activo, inactivo, etc.)
+  reset_token?: string;
+  reset_expires?: Date;
 }
