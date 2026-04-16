@@ -4,6 +4,8 @@ import {
   CreateConductorDTO,
   UpdateConductorDTO,
   ConductorLoginDTO,
+  ForgotPasswordDTO,
+  ResetPasswordDTO,
 } from '../dto/conductor-dto';
 import { plainToInstance } from 'class-transformer';
 import { checkDto } from '../../../shared/utils/checkDTO';
@@ -159,6 +161,42 @@ export async function logoutConductor(
     // Limpia el estado de autenticación en el request
     req.auth = null;
     return sendSuccess(res, 200, 'Sesión cerrada correctamente');
+  } catch (error) {
+    next(error);
+  }
+}
+// Forgot Password
+export async function forgotPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const dto: ForgotPasswordDTO = plainToInstance(
+      ForgotPasswordDTO,
+      req.body as Record<string, unknown>,
+    );
+    await checkDto(dto);
+    await service.forgotPassword(dto);
+    return sendSuccess(res, 200, 'Enlace de recuperación enviado al correo');
+  } catch (error) {
+    next(error);
+  }
+}
+// Reset Password
+export async function resetPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const dto: ResetPasswordDTO = plainToInstance(
+      ResetPasswordDTO,
+      req.body as Record<string, unknown>,
+    );
+    await checkDto(dto);
+    await service.resetPassword(dto);
+    return sendSuccess(res, 200, 'Contraseña restablecida correctamente');
   } catch (error) {
     next(error);
   }
