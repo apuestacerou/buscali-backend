@@ -68,14 +68,17 @@ export async function forgotPasswordUsuario(
   next: NextFunction,
 ) {
   try {
+    console.log('Recuperación de contraseña solicitada para:', req.body.correo);
     const dto: ForgotPasswordDTO = plainToInstance(
       ForgotPasswordDTO,
       req.body as Record<string, unknown>,
     );
     await checkDto(dto);
     await service.forgotPassword(dto);
+    console.log('Email de recuperación enviado a:', req.body.correo);
     return sendSuccess(res, 200, 'Enlace de recuperación enviado al correo');
   } catch (error) {
+    console.error('Error al enviar recuperación de contraseña:', error);
     next(error);
   }
 }
@@ -86,14 +89,17 @@ export async function resetPasswordUsuario(
   next: NextFunction,
 ) {
   try {
+    console.log('Intento de reseteo de contraseña con token:', req.body.token?.substring(0, 8) + '...');
     const dto: ResetPasswordDTO = plainToInstance(
       ResetPasswordDTO,
       req.body as Record<string, unknown>,
     );
     await checkDto(dto);
     await service.resetPassword(dto);
+    console.log('Contraseña restablecida exitosamente');
     return sendSuccess(res, 200, 'Contraseña restablecida correctamente');
   } catch (error) {
+    console.error('Error al restablecer contraseña:', error);
     next(error);
   }
 }
