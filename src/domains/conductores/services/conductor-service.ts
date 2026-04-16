@@ -188,7 +188,7 @@ export class ConductorService {
     await this.repo.setResetToken(dto.correo_electronico, token, expires);
 
     // Enviar email
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       service: 'gmail', // o el servicio que uses
       auth: {
         user: process.env.EMAIL_USER,
