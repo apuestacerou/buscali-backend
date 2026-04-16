@@ -59,6 +59,10 @@ export class ConductorService {
     if (existing_telefono) {
       errors.push('Conductor con este telefono ya existe');
     }
+    //valida que acepte términos
+    if (!dto.aceptaTerminos) {
+      errors.push('Debe aceptar los términos y condiciones');
+    }
     if (errors.length > 0) {
       throw new ConflictError(errors);
     }
