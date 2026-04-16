@@ -122,17 +122,26 @@ export class UsuarioService {
     return { token };
   }
 
+  /**
+   * Inicia el proceso de recuperación de contraseña.
+   * Genera un token único y lo envía por email al usuario.
+   * El token expira en 15 minutos.
+   */
   async forgotPassword(dto: ForgotPasswordDTO): Promise<void> {
     const usuario = await this.repo.findUsuarioByCorreo(dto.correo);
     if (!usuario) {
       throw new ValidationError('Correo electrónico no registrado');
     }
 
+    // Generar token de recuperación (32 caracteres hex)
     const token = crypto.randomBytes(16).toString('hex');
+    // Token expira en 15 minutos
     const expires = new Date(Date.now() + 15 * 60 * 1000);
 
+    // Guardar token en la base de datos
     await this.repo.setResetToken(dto.correo, token, expires);
 
+    // Configurar transporte de email
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -141,6 +150,7 @@ export class UsuarioService {
       },
     });
 
+    // Enviar email con enlace de recuperación
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: dto.correo,
@@ -149,7 +159,12 @@ export class UsuarioService {
     });
   }
 
+  /**
+   * Restablece la contraseña de un usuario usando un token válido.
+   * El token debe no estar expirado.
+   */
   async resetPassword(dto: ResetPasswordDTO): Promise<void> {
+    // Hashear la nueva contraseña y actualizar en la base de datos
     const usuario = await this.repo.resetPassword(
       dto.token,
       await bcrypt.hash(dto.nueva_password, 10),
