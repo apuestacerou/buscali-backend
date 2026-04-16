@@ -73,3 +73,17 @@ export class ConductorLoginDTO {
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" }) // Validación para contraseñas seguras
   contrasena!: string
 }
+
+//DTO para forgot password
+export class ForgotPasswordDTO {
+  @IsEmail({},{ message: 'Formato de correo electrónico inválido' })
+  correo_electronico!: string
+}
+
+//DTO para reset password
+export class ResetPasswordDTO {
+  @Matches(/^[A-Za-z0-9]{32}$/, { message: 'Token inválido' }) // Asumiendo token de 32 caracteres
+  token!: string
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" })
+  nueva_contrasena!: string
+}
