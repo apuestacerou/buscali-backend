@@ -5,6 +5,8 @@ import {
   UpdateConductorDTO,
   ConductorResponseDTO,
   ConductorLoginDTO,
+  ForgotPasswordDTO,
+  ResetPasswordDTO,
 } from '../dto/conductor-dto';
 import {
   ConflictError,
@@ -12,6 +14,8 @@ import {
 } from '../../../shared/errors/error.class';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 export class ConductorService {
   private repo = new ConductorRepository();
@@ -162,5 +166,44 @@ export class ConductorService {
     });
 
     return { token };
+  }
+
+  //forgot password
+  async forgotPassword(dto: ForgotPasswordDTO): Promise<void> {
+    const conductor = await this.repo.findConductorByCorreoElectronico(dto.correo_electronico);
+    if (!conductor) {
+      throw new ValidationError('Correo electrónico no registrado');
+    }
+
+    const token = crypto.randomBytes(16).toString('hex');
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+
+    await this.repo.setResetToken(dto.correo_electronico, token, expires);
+
+    // Enviar email
+    const transporter = nodemailer.createTransporter({
+      service: 'gmail', // o el servicio que uses
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: dto.correo_electronico,
+      subject: 'Recuperación de contraseña',
+      text: `Usa este enlace para restablecer tu contraseña: ${process.env.FRONTEND_URL}/reset-password?token=${token}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+  }
+
+  //reset password
+  async resetPassword(dto: ResetPasswordDTO): Promise<void> {
+    const conductor = await this.repo.resetPassword(dto.token, await bcrypt.hash(dto.nueva_contrasena, 10));
+    if (!conductor) {
+      throw new ValidationError('Token inválido o expirado');
+    }
   }
 }
