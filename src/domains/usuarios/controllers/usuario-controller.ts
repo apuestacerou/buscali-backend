@@ -19,6 +19,7 @@ export async function createUsuario(
   next: NextFunction,
 ) {
   try {
+    console.log('Intentando registrar usuario:', req.body.correo);
     const dto: CreateUsuarioDTO = plainToInstance(
       CreateUsuarioDTO,
       req.body as Record<string, unknown>,
@@ -26,8 +27,10 @@ export async function createUsuario(
     await checkDto(dto);
 
     const usuario = await service.create(dto);
+    console.log('Usuario registrado exitosamente:', usuario.correo);
     return sendSuccess(res, 201, 'Usuario registrado correctamente', usuario);
   } catch (error) {
+    console.error('Error al registrar usuario:', error);
     next(error);
   }
 }
