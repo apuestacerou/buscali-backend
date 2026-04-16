@@ -22,6 +22,9 @@ export class UsuarioRepository {
     return usuario ? (usuario.toJSON() as Usuario) : null;
   }
 
+  /**
+   * Crea un nuevo usuario en la base de datos.
+   */
   async createUsuario(
     data: Omit<Usuario, 'id_usuario' | 'fecha_registro'>,
   ): Promise<Usuario> {
