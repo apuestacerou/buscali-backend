@@ -23,9 +23,10 @@ export class CreateUsuarioDTO {
   })
   telefono?: string;
 
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, {
+  @IsNotEmpty({ message: 'Contraseña es requerida' })
+  @Matches(/^(?=.*[A-Z])(?=.*[0-9]).{8,50}$/, {
     message:
-      'La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo',
+      'La contraseña debe tener entre 8 y 50 caracteres, incluir al menos una mayúscula y un número',
   })
   password!: string;
 
