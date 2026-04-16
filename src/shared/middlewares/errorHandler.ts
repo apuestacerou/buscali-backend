@@ -20,6 +20,7 @@ export function errorHandler(
       message: 'Error de validación',
       errors: err.messages,
       details: _formatErrorDetails(err.messages),
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -30,6 +31,7 @@ export function errorHandler(
       message: 'Conflicto en la operación',
       errors: err.messages,
       details: _formatErrorDetails(err.messages),
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -40,6 +42,7 @@ export function errorHandler(
       message: 'No autorizado',
       errors: err.messages,
       details: _formatErrorDetails(err.messages),
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -49,6 +52,7 @@ export function errorHandler(
     message: 'Error interno del servidor',
     errors: [err.message || 'Unexpected error'],
     details: err.message || 'Unexpected error',
+    timestamp: new Date().toISOString(),
   });
 }
 
