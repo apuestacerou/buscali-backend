@@ -20,7 +20,6 @@ export class CreateConductorDTO {
   @IsOptional() // Permite que el campo sea opcional al crear un conductor
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" }) // Validación para contraseñas seguras
   contrasena?: string;
-// (?) permite enviar o no el estado al crear un conductor, si no se envía se asume que es "Activo" por defecto en la base de datos, pero si se envía debe ser "Activo" o "Inactivo"
 
   @IsOptional() // Permite que el campo sea opcional al crear un conductor
   @IsEnum(['Activo', 'Inactivo'], { message: 'Estado debe ser "Activo" o "Inactivo", con la primera letra en mayúscula' })
