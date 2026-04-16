@@ -1,5 +1,5 @@
 import { Conductor } from '../types/conductor'
-import { IsEmail, IsEnum, IsOptional, Matches} from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, Matches, IsBoolean} from 'class-validator';
 
 // DTO para crear un cliente
 export class CreateConductorDTO {
@@ -20,6 +20,9 @@ export class CreateConductorDTO {
   @IsOptional() // Permite que el campo sea opcional al crear un conductor
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" }) // Validación para contraseñas seguras
   contrasena?: string;
+
+  @IsBoolean({ message: 'Debe aceptar los términos y condiciones' })
+  aceptaTerminos!: boolean;
 
   @IsOptional() // Permite que el campo sea opcional al crear un conductor
   @IsEnum(['Activo', 'Inactivo'], { message: 'Estado debe ser "Activo" o "Inactivo", con la primera letra en mayúscula' })
