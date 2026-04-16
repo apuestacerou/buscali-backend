@@ -69,27 +69,36 @@ export class UsuarioService {
     return new UsuarioResponseDTO(usuario);
   }
 
+  /**
+   * Inicia sesión de un usuario.
+   * Permite login por correo o teléfono.
+   * Valida credenciales y genera un JWT token.
+   */
   async login(dto: UsuarioLoginDTO): Promise<{ token: string }> {
     const errors: string[] = [];
 
+    // Verificar que se proporcione al menos correo o teléfono
     if (!dto.correo && !dto.telefono) {
       errors.push('Debe proporcionar correo electrónico o teléfono');
     }
 
     let existingUsuario: Usuario | null = null;
 
+    // Buscar usuario por correo
     if (dto.correo) {
       existingUsuario = await this.repo.findUsuarioByCorreo(dto.correo);
       if (!existingUsuario) {
         errors.push('Usuario con este correo electrónico no existe');
       }
     } else if (dto.telefono) {
+      // Buscar usuario por teléfono
       existingUsuario = await this.repo.findUsuarioByTelefono(dto.telefono);
       if (!existingUsuario) {
         errors.push('Usuario con este teléfono no existe');
       }
     }
 
+    // Verificar contraseña si el usuario existe
     if (existingUsuario) {
       const isValid = await bcrypt.compare(dto.password, existingUsuario.password);
       if (!isValid) {
@@ -101,6 +110,7 @@ export class UsuarioService {
       throw new ValidationError(errors);
     }
 
+    // Generar token JWT
     const payload = {
       sub: existingUsuario!.id_usuario,
     };
