@@ -19,6 +19,7 @@ export function errorHandler(
       code: 400,
       message: 'Error de validación',
       errors: err.messages,
+      details: _formatErrorDetails(err.messages),
     });
   }
 
@@ -28,6 +29,7 @@ export function errorHandler(
       code: 409,
       message: 'Conflicto en la operación',
       errors: err.messages,
+      details: _formatErrorDetails(err.messages),
     });
   }
 
@@ -37,6 +39,7 @@ export function errorHandler(
       code: 401,
       message: 'No autorizado',
       errors: err.messages,
+      details: _formatErrorDetails(err.messages),
     });
   }
 
@@ -45,5 +48,13 @@ export function errorHandler(
     code: 500,
     message: 'Error interno del servidor',
     errors: [err.message || 'Unexpected error'],
+    details: err.message || 'Unexpected error',
   });
+}
+
+/**
+ * Formatea los errores para una mejor presentación
+ */
+function _formatErrorDetails(errors: string[]): string {
+  return errors.map((err, idx) => `${idx + 1}. ${err}`).join('\n');
 }

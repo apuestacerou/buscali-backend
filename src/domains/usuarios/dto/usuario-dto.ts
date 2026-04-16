@@ -35,12 +35,14 @@ export class CreateUsuarioDTO {
 
 export class UpdateUsuarioDTO {
   @IsOptional()
+  @IsNotEmpty({ message: 'Nombre no puede estar vacío' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,60}$/, {
     message: 'Nombre solo puede contener letras y espacios',
   })
   nombre?: string;
 
   @IsOptional()
+  @IsNotEmpty({ message: 'Apellido no puede estar vacío' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,60}$/, {
     message: 'Apellido solo puede contener letras y espacios',
   })
@@ -86,9 +88,10 @@ export class UsuarioLoginDTO {
   })
   telefono?: string;
 
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, {
+  @IsNotEmpty({ message: 'Contraseña es requerida' })
+  @Matches(/^(?=.*[A-Z])(?=.*[0-9]).{8,50}$/, {
     message:
-      'La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo',
+      'La contraseña debe tener entre 8 y 50 caracteres, incluir al menos una mayúscula y un número',
   })
   password!: string;
 }
@@ -102,9 +105,10 @@ export class ResetPasswordDTO {
   @Matches(/^[A-Fa-f0-9]{32}$/, { message: 'Token inválido' })
   token!: string;
 
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, {
+  @IsNotEmpty({ message: 'Nueva contraseña es requerida' })
+  @Matches(/^(?=.*[A-Z])(?=.*[0-9]).{8,50}$/, {
     message:
-      'La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo',
+      'La contraseña debe tener entre 8 y 50 caracteres, incluir al menos una mayúscula y un número',
   })
   nueva_password!: string;
 }
