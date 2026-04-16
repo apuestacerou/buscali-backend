@@ -1,0 +1,141 @@
+import { UsuarioRepository } from '../repositories/usuario-repository';
+import { Usuario } from '../types/usuario';
+import {
+  CreateUsuarioDTO,
+  UsuarioResponseDTO,
+  UsuarioLoginDTO,
+  ForgotPasswordDTO,
+  ResetPasswordDTO,
+} from '../dto/usuario-dto';
+import {
+  ConflictError,
+  ValidationError,
+} from '../../../shared/errors/error.class';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
+
+export class UsuarioService {
+  private repo = new UsuarioRepository();
+
+  async create(dto: CreateUsuarioDTO): Promise<UsuarioResponseDTO> {
+    const errors: string[] = [];
+
+    const existingCorreo = await this.repo.findUsuarioByCorreo(dto.correo);
+    if (existingCorreo) {
+      errors.push('Usuario con este correo ya existe');
+    }
+
+    if (dto.telefono) {
+      const existingTelefono = await this.repo.findUsuarioByTelefono(
+        dto.telefono,
+      );
+      if (existingTelefono) {
+        errors.push('Usuario con este teléfono ya existe');
+      }
+    }
+
+    if (!dto.aceptaTerminos) {
+      errors.push('Debe aceptar los términos y condiciones');
+    }
+
+    if (errors.length > 0) {
+      throw new ConflictError(errors);
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const usuario = await this.repo.createUsuario({
+      nombre: dto.nombre,
+      apellido: dto.apellido,
+      correo: dto.correo,
+      telefono: dto.telefono,
+      password: hashedPassword,
+      reset_token: null,
+      reset_expires: null,
+    } as Omit<Usuario, 'id_usuario' | 'fecha_registro'>);
+
+    return new UsuarioResponseDTO(usuario);
+  }
+
+  async login(dto: UsuarioLoginDTO): Promise<{ token: string }> {
+    const errors: string[] = [];
+
+    if (!dto.correo && !dto.telefono) {
+      errors.push('Debe proporcionar correo electrónico o teléfono');
+    }
+
+    let existingUsuario: Usuario | null = null;
+
+    if (dto.correo) {
+      existingUsuario = await this.repo.findUsuarioByCorreo(dto.correo);
+      if (!existingUsuario) {
+        errors.push('Usuario con este correo electrónico no existe');
+      }
+    } else if (dto.telefono) {
+      existingUsuario = await this.repo.findUsuarioByTelefono(dto.telefono);
+      if (!existingUsuario) {
+        errors.push('Usuario con este teléfono no existe');
+      }
+    }
+
+    if (existingUsuario) {
+      const isValid = await bcrypt.compare(dto.password, existingUsuario.password);
+      if (!isValid) {
+        errors.push('Contraseña no válida');
+      }
+    }
+
+    if (errors.length > 0) {
+      throw new ValidationError(errors);
+    }
+
+    const payload = {
+      sub: existingUsuario!.id_usuario,
+    };
+
+    const token = jwt.sign({ payload }, process.env.SECRET_JWT_KEY!, {
+      expiresIn: '1h',
+    });
+
+    return { token };
+  }
+
+  async forgotPassword(dto: ForgotPasswordDTO): Promise<void> {
+    const usuario = await this.repo.findUsuarioByCorreo(dto.correo);
+    if (!usuario) {
+      throw new ValidationError('Correo electrónico no registrado');
+    }
+
+    const token = crypto.randomBytes(16).toString('hex');
+    const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.repo.setResetToken(dto.correo, token, expires);
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: dto.correo,
+      subject: 'Recuperación de contraseña',
+      text: `Usa este enlace para restablecer tu contraseña: ${process.env.FRONTEND_URL}/reset-password?token=${token}`,
+    });
+  }
+
+  async resetPassword(dto: ResetPasswordDTO): Promise<void> {
+    const usuario = await this.repo.resetPassword(
+      dto.token,
+      await bcrypt.hash(dto.nueva_password, 10),
+    );
+    if (!usuario) {
+      throw new ValidationError('Token inválido o expirado');
+    }
+  }
+}

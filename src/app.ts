@@ -3,6 +3,7 @@ dotenv.config();
 import express from 'express';
 import conductorRouter from './domains/conductores/routers/conductor-router';
 import rutasRouter from './domains/rutas/routers/ruta-router';
+import usuarioRouter from './domains/usuarios/routers/usuario-router';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import { sequelize } from './shared/db/database';
@@ -56,6 +57,7 @@ app.get('/health', (_req, res) =>
 );
 
 app.use('/api/v1/conductores', conductorRouter);
+app.use('/api/v1/usuarios', usuarioRouter);
 app.use('/api/v1/rutas', rutasRouter);
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
