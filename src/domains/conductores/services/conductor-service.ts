@@ -131,31 +131,38 @@ export class ConductorService {
   //Login
   async login(dto: ConductorLoginDTO): Promise<{ token: string }> {
     const errors: string[] = [];
-    //valida que exista un conductor con ese telefono
-    const existing_conductor = await this.repo.findConductorByTelefono(
-      dto.telefono,
-    );
 
-    {
-      //muestra solo un error a la vez, porq es imposible tener los dos al tiempo
-      // es imposible tener la contraseña mala para un telefono q no existe
-      // pero si es posible q el telefono este malo
-      // y q la contraseña este mal para un telefono q si existe
+    if (!dto.correo_electronico && !dto.telefono) {
+      errors.push('Debe proporcionar correo electrónico o teléfono');
     }
-    if (!existing_conductor) {
-      errors.push('Conductor con este telefono no existe');
-    } else {
+
+    let existing_conductor: Conductor | null = null;
+    if (dto.correo_electronico) {
+      existing_conductor = await this.repo.findConductorByCorreoElectronico(dto.correo_electronico);
+      if (!existing_conductor) {
+        errors.push('Conductor con este correo electrónico no existe');
+      }
+    } else if (dto.telefono) {
+      existing_conductor = await this.repo.findConductorByTelefono(dto.telefono);
+      if (!existing_conductor) {
+        errors.push('Conductor con este teléfono no existe');
+      }
+    }
+
+    if (existing_conductor) {
       const isValid = await bcrypt.compare(
         dto.contrasena,
         existing_conductor.contrasena,
       );
       if (!isValid) {
-        errors.push('Contraseña no Valida');
+        errors.push('Contraseña no válida');
       }
     }
+
     if (errors.length > 0) {
       throw new ValidationError(errors);
     }
+
     const payload = {
       sub: existing_conductor!.cedula,
     };

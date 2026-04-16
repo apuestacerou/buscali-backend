@@ -68,10 +68,16 @@ export class ConductorResponseDTO {
 
 //DTO para login
 export class ConductorLoginDTO {
-  @Matches(/^\+?[0-9]{7,15}$/, { message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos' }) // Validación para permitir solo dígitos en el teléfono
-  telefono!: string
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" }) // Validación para contraseñas seguras
-  contrasena!: string
+  @IsOptional()
+  @IsEmail({},{ message: 'Formato de correo electrónico inválido' })
+  correo_electronico?: string;
+
+  @IsOptional()
+  @Matches(/^\+?[0-9]{7,15}$/, { message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos' })
+  telefono?: string;
+
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" })
+  contrasena!: string;
 }
 
 //DTO para forgot password
