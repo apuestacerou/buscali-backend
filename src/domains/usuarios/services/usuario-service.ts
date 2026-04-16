@@ -43,10 +43,10 @@ export class UsuarioService {
       }
     }
 
-    // Validar aceptación de términos - temporalmente removido para testing
-    // if (!dto.aceptaTerminos) {
-    //   errors.push('Debe aceptar los términos y condiciones');
-    // }
+    // Validar aceptación de términos
+    if (!dto.aceptaTerminos) {
+      errors.push('Es obligatorio aceptar los términos y condiciones para registrarse');
+    }
 
     if (errors.length > 0) {
       throw new ConflictError(errors);
