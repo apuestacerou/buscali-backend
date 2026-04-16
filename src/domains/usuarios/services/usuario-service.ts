@@ -135,8 +135,8 @@ export class UsuarioService {
 
     // Generar token de recuperación (32 caracteres hex)
     const token = crypto.randomBytes(16).toString('hex');
-    // Token expira en 15 minutos
-    const expires = new Date(Date.now() + 15 * 60 * 1000);
+    // Token expira en 30 minutos
+    const expires = new Date(Date.now() + 30 * 60 * 1000);
 
     // Guardar token en la base de datos
     await this.repo.setResetToken(dto.correo, token, expires);
