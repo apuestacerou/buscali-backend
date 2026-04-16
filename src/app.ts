@@ -16,7 +16,7 @@ import { errorHandler } from './shared/middlewares/errorHandler';
 async function bootstrap() {
   try {
     await sequelize.authenticate();
-    await sequelize.sync(); // opcional, sincroniza modelos con la BD
+    await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' }); // sincroniza modelos con la BD en entorno de desarrollo
     console.log('DB connected');
   } catch (error) {
     console.error('Unable to connect to the database:', error);
@@ -66,7 +66,8 @@ app.listen(PORT, () => {
   console.log(`✓ Conductores service running on http://localhost:${PORT}`);
   console.log(`  Endpoints:`);
   console.log(`    conductores    /api/v1/conductores`);
-  console.log(`    rutas   /api/v1/rutas`);
+  console.log(`    usuarios       /api/v1/usuarios`);
+  console.log(`    rutas          /api/v1/rutas`);
   console.log(`  Swagger docs: http://localhost:${PORT}/api/v1/docs`);
 });
 
