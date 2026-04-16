@@ -41,6 +41,7 @@ export async function loginUsuario(
   next: NextFunction,
 ) {
   try {
+    console.log('Intentando login:', req.body.correo || req.body.telefono);
     const dto: UsuarioLoginDTO = plainToInstance(
       UsuarioLoginDTO,
       req.body as Record<string, unknown>,
@@ -53,8 +54,10 @@ export async function loginUsuario(
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
+    console.log('Login exitoso');
     return sendSuccess(res, 200, 'Sesión iniciada correctamente');
   } catch (error) {
+    console.error('Error en login:', error);
     next(error);
   }
 }
