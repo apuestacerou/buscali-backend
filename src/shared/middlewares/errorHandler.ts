@@ -52,6 +52,7 @@ export function errorHandler(
     message: 'Error interno del servidor',
     errors: [err.message || 'Unexpected error'],
     details: err.message || 'Unexpected error',
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
     timestamp: new Date().toISOString(),
   });
 }

@@ -187,20 +187,34 @@ export class ConductorService {
 
     await this.repo.setResetToken(dto.correo_electronico, token, expires);
 
+    const emailUser = process.env.EMAIL_USER;
+    const emailPass = process.env.EMAIL_PASS;
+    const frontendUrl = process.env.FRONTEND_URL;
+
+    if (!emailUser || !emailPass) {
+      throw new Error(
+        'No se ha configurado EMAIL_USER o EMAIL_PASS en el archivo .env',
+      );
+    }
+
+    if (!frontendUrl) {
+      throw new Error('No se ha configurado FRONTEND_URL en el archivo .env');
+    }
+
     // Enviar email
     const transporter = nodemailer.createTransport({
       service: 'gmail', // o el servicio que uses
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: emailUser,
+        pass: emailPass,
       },
     });
 
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: emailUser,
       to: dto.correo_electronico,
       subject: 'Recuperación de contraseña',
-      text: `Usa este enlace para restablecer tu contraseña: ${process.env.FRONTEND_URL}/reset-password?token=${token}`,
+      text: `Usa este enlace para restablecer tu contraseña: ${frontendUrl}/reset-password?token=${token}`,
     };
 
     await transporter.sendMail(mailOptions);

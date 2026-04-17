@@ -14,7 +14,6 @@ import {
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
 
 export class UsuarioService {
   private repo = new UsuarioRepository();
@@ -127,7 +126,7 @@ export class UsuarioService {
    * Genera un token único y lo envía por email al usuario.
    * El token expira en 15 minutos.
    */
-  async forgotPassword(dto: ForgotPasswordDTO): Promise<void> {
+  async forgotPassword(dto: ForgotPasswordDTO): Promise<{ message: string }> {
     const usuario = await this.repo.findUsuarioByCorreo(dto.correo);
     if (!usuario) {
       throw new ValidationError('Correo electrónico no registrado');
@@ -141,22 +140,14 @@ export class UsuarioService {
     // Guardar token en la base de datos
     await this.repo.setResetToken(dto.correo, token, expires);
 
-    // Configurar transporte de email
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const recoveryLink = `${frontendUrl}/reset-password?token=${token}`;
 
-    // Enviar email con enlace de recuperación
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: dto.correo,
-      subject: 'Recuperación de contraseña',
-      text: `Usa este enlace para restablecer tu contraseña: ${process.env.FRONTEND_URL}/reset-password?token=${token}`,
-    });
+    console.log('Enlace de recuperación generado:', recoveryLink);
+
+    return {
+      message: 'Token generado correctamente (revisar consola)',
+    };
   }
 
   /**
