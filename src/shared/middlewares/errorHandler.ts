@@ -19,8 +19,6 @@ export function errorHandler(
       code: 400,
       message: 'Error de validación',
       errors: err.messages,
-      details: _formatErrorDetails(err.messages),
-      timestamp: new Date().toISOString(),
     });
   }
 
@@ -30,8 +28,6 @@ export function errorHandler(
       code: 409,
       message: 'Conflicto en la operación',
       errors: err.messages,
-      details: _formatErrorDetails(err.messages),
-      timestamp: new Date().toISOString(),
     });
   }
 
@@ -41,8 +37,6 @@ export function errorHandler(
       code: 401,
       message: 'No autorizado',
       errors: err.messages,
-      details: _formatErrorDetails(err.messages),
-      timestamp: new Date().toISOString(),
     });
   }
 
@@ -51,15 +45,5 @@ export function errorHandler(
     code: 500,
     message: 'Error interno del servidor',
     errors: [err.message || 'Unexpected error'],
-    details: err.message || 'Unexpected error',
-    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
-    timestamp: new Date().toISOString(),
   });
-}
-
-/**
- * Formatea los errores para una mejor presentación
- */
-function _formatErrorDetails(errors: string[]): string {
-  return errors.map((err, idx) => `${idx + 1}. ${err}`).join('\n');
 }

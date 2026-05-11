@@ -3,14 +3,13 @@ dotenv.config();
 import express from 'express';
 import conductorRouter from './domains/conductores/routers/conductor-router';
 import rutasRouter from './domains/rutas/routers/ruta-router';
-import usuariosRoutes from './domains/usuarios/routes/usuariosRoutes';
+import usuariosRoutes from './domains/usuarios/routers/usuario-router';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import { sequelize } from './shared/db/database';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 //middleware's
-import { jwtAuth } from './shared/middlewares/jwtAuth';
 import { errorHandler } from './shared/middlewares/errorHandler';
 
 async function bootstrap() {
@@ -18,13 +17,28 @@ async function bootstrap() {
     await sequelize.authenticate();
     await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' }); // sincroniza modelos con la BD en entorno de desarrollo
     console.log('DB connected');
+    console.log(
+      `\n✅ Buscali Backend Service running on http://localhost:${PORT}\n`,
+    );
+    console.log(`📍 Available Endpoints:\n`);
+    console.log(
+      `   🚗 POST   /api/v1/conductores          - Conductores Management`,
+    );
+    console.log(
+      `   👤 POST   /api/v1/usuarios             - User Registration & Login`,
+    );
+    console.log(
+      `   🛣️  GET   /api/v1/rutas                - Routes Management`,
+    );
+    console.log(
+      `   📚 GET   /api/v1/docs                  - Swagger Documentation\n`,
+    );
+    console.log(`✨ Ready to accept requests!\n`);
   } catch (error) {
     console.error('Unable to connect to the database:', error);
     throw error; // Throw to prevent app from starting
   }
 }
-
-bootstrap();
 
 const app = express();
 
@@ -71,29 +85,17 @@ app.use((_req, res) => {
   res.status(404).json({
     error: 'No encontrado',
     message:
-      'La ruta no existe. Prueba: GET / , GET /health , GET /api/usuarios',
+      'La ruta no existe. Prueba: GET / , GET /health , GET /api/v1/rutas',
     path: _req.path,
   });
 });
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 app.listen(PORT, () => {
-  console.log(
-    `\n✅ Buscali Backend Service running on http://localhost:${PORT}\n`,
-  );
-  console.log(`📍 Available Endpoints:\n`);
-  console.log(
-    `   🚗 POST   /api/v1/conductores          - Conductores Management`,
-  );
-  console.log(
-    `   👤 POST   /api/v1/usuarios             - User Registration & Login`,
-  );
-  console.log(`   🛣️  GET   /api/v1/rutas                - Routes Management`);
-  console.log(
-    `   📚 GET   /api/v1/docs                  - Swagger Documentation\n`,
-  );
-  console.log(`✨ Ready to accept requests!\n`);
+  console.log(`Server running on port ${PORT}`);
+  console.log('Starting up... Connecting to database...');
 });
+bootstrap();
 
 //middleware para manejar errores
 app.use(errorHandler);
