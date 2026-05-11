@@ -47,6 +47,18 @@ export class ConductorModel extends Model {
     defaultValue: 'Activo',
   })
   estado?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  reset_token?: string;
+
+  @Column({
+    type: DataType.DATE,
+    allowNull: true,
+  })
+  reset_expires?: Date;
   
   @Column({
     type: DataType.DATE,

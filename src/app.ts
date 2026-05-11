@@ -16,16 +16,21 @@ import { errorHandler } from './shared/middlewares/errorHandler';
 async function bootstrap() {
   try {
     await sequelize.authenticate();
-    await sequelize.sync(); // opcional, sincroniza modelos con la BD
+    await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' }); // sincroniza modelos con la BD en entorno de desarrollo
     console.log('DB connected');
   } catch (error) {
     console.error('Unable to connect to the database:', error);
+    throw error; // Throw to prevent app from starting
   }
 }
 
 bootstrap();
 
 const app = express();
+
+// Configurar Express para devolver JSON formateado (pretty print)
+// 2 espacios de indentación para mejor legibilidad
+app.set('json spaces', 2);
 
 // Middleware's
 app.use(express.json());
@@ -57,6 +62,7 @@ app.get('/health', (_req, res) =>
 );
 
 app.use('/api/v1/conductores', conductorRouter);
+app.use('/api/v1/usuarios', usuarioRouter);
 app.use('/api/v1/rutas', rutasRouter);
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/v1/usuarios', usuariosRoutes);
@@ -73,11 +79,21 @@ app.use((_req, res) => {
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 app.listen(PORT, () => {
-  console.log(`✓ Conductores service running on http://localhost:${PORT}`);
-  console.log(`  Endpoints:`);
-  console.log(`    conductores    /api/v1/conductores`);
-  console.log(`    rutas   /api/v1/rutas`);
-  console.log(`  Swagger docs: http://localhost:${PORT}/api/v1/docs`);
+  console.log(
+    `\n✅ Buscali Backend Service running on http://localhost:${PORT}\n`,
+  );
+  console.log(`📍 Available Endpoints:\n`);
+  console.log(
+    `   🚗 POST   /api/v1/conductores          - Conductores Management`,
+  );
+  console.log(
+    `   👤 POST   /api/v1/usuarios             - User Registration & Login`,
+  );
+  console.log(`   🛣️  GET   /api/v1/rutas                - Routes Management`);
+  console.log(
+    `   📚 GET   /api/v1/docs                  - Swagger Documentation\n`,
+  );
+  console.log(`✨ Ready to accept requests!\n`);
 });
 
 //middleware para manejar errores

@@ -1,5 +1,5 @@
 import { Conductor } from '../types/conductor'
-import { IsEmail, IsEnum, IsOptional, Matches} from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, Matches, IsBoolean} from 'class-validator';
 
 // DTO para crear un cliente
 export class CreateConductorDTO {
@@ -17,10 +17,11 @@ export class CreateConductorDTO {
   @Matches(/^\+?[0-9]{7,15}$/, { message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos' }) // Validación para permitir solo dígitos en el teléfono
   telefono!: string;
 
-  @IsOptional() // Permite que el campo sea opcional al crear un conductor
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" }) // Validación para contraseñas seguras
-  contrasena?: string;
-// (?) permite enviar o no el estado al crear un conductor, si no se envía se asume que es "Activo" por defecto en la base de datos, pero si se envía debe ser "Activo" o "Inactivo"
+  contrasena!: string;
+
+  @IsBoolean({ message: 'Debe aceptar los términos y condiciones' })
+  aceptaTerminos!: boolean;
 
   @IsOptional() // Permite que el campo sea opcional al crear un conductor
   @IsEnum(['Activo', 'Inactivo'], { message: 'Estado debe ser "Activo" o "Inactivo", con la primera letra en mayúscula' })
@@ -67,8 +68,28 @@ export class ConductorResponseDTO {
 
 //DTO para login
 export class ConductorLoginDTO {
-  @Matches(/^\+?[0-9]{7,15}$/, { message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos' }) // Validación para permitir solo dígitos en el teléfono
-  telefono!: string
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" }) // Validación para contraseñas seguras
-  contrasena!: string
+  @IsOptional()
+  @IsEmail({},{ message: 'Formato de correo electrónico inválido' })
+  correo_electronico?: string;
+
+  @IsOptional()
+  @Matches(/^\+?[0-9]{7,15}$/, { message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos' })
+  telefono?: string;
+
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" })
+  contrasena!: string;
+}
+
+//DTO para forgot password
+export class ForgotPasswordDTO {
+  @IsEmail({},{ message: 'Formato de correo electrónico inválido' })
+  correo_electronico!: string
+}
+
+//DTO para reset password
+export class ResetPasswordDTO {
+  @Matches(/^[A-Za-z0-9]{32}$/, { message: 'Token inválido' }) // Asumiendo token de 32 caracteres
+  token!: string
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/, { message: "La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo" })
+  nueva_contrasena!: string
 }

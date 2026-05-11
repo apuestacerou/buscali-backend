@@ -4,6 +4,8 @@ import {
   CreateConductorDTO,
   UpdateConductorDTO,
   ConductorLoginDTO,
+  ForgotPasswordDTO,
+  ResetPasswordDTO,
 } from '../dto/conductor-dto';
 import { plainToInstance } from 'class-transformer';
 import { checkDto } from '../../../shared/utils/checkDTO';
@@ -58,10 +60,23 @@ export async function createConductor(
     await checkDto(dto);
 
     const newConductor = await service.create(dto);
+    // Auto login después del registro
+    const loginDto: ConductorLoginDTO = {
+      telefono: dto.telefono,
+      contrasena: dto.contrasena,
+    };
+    const login = await service.login(loginDto);
+    // seteo de cookie segura
+    res.cookie('access_token', login.token, {
+      httpOnly: true, // solo accesible desde el servidor
+      secure: process.env.NODE_ENV === 'production', // solo por https en producción
+      sameSite: 'strict', // solo desde el mismo dominio
+      // maxAge: 1000 * 60 * 60 // opcional: 1 hora
+    });
     return sendSuccess(
       res,
       201,
-      'Conductor creado correctamente',
+      'Conductor registrado y autenticado correctamente',
       newConductor,
     );
   } catch (error) {
@@ -146,6 +161,42 @@ export async function logoutConductor(
     // Limpia el estado de autenticación en el request
     req.auth = null;
     return sendSuccess(res, 200, 'Sesión cerrada correctamente');
+  } catch (error) {
+    next(error);
+  }
+}
+// Forgot Password
+export async function forgotPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const dto: ForgotPasswordDTO = plainToInstance(
+      ForgotPasswordDTO,
+      req.body as Record<string, unknown>,
+    );
+    await checkDto(dto);
+    await service.forgotPassword(dto);
+    return sendSuccess(res, 200, 'Enlace de recuperación enviado al correo');
+  } catch (error) {
+    next(error);
+  }
+}
+// Reset Password
+export async function resetPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const dto: ResetPasswordDTO = plainToInstance(
+      ResetPasswordDTO,
+      req.body as Record<string, unknown>,
+    );
+    await checkDto(dto);
+    await service.resetPassword(dto);
+    return sendSuccess(res, 200, 'Contraseña restablecida correctamente');
   } catch (error) {
     next(error);
   }

@@ -5,6 +5,8 @@ import {
   UpdateConductorDTO,
   ConductorResponseDTO,
   ConductorLoginDTO,
+  ForgotPasswordDTO,
+  ResetPasswordDTO,
 } from '../dto/conductor-dto';
 import {
   ConflictError,
@@ -12,6 +14,8 @@ import {
 } from '../../../shared/errors/error.class';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 export class ConductorService {
   private repo = new ConductorRepository();
@@ -59,13 +63,17 @@ export class ConductorService {
     if (existing_telefono) {
       errors.push('Conductor con este telefono ya existe');
     }
+    //valida que acepte términos
+    if (!dto.aceptaTerminos) {
+      errors.push('Debe aceptar los términos y condiciones');
+    }
     if (errors.length > 0) {
       throw new ConflictError(errors);
     }
 
     //hashea la contraseña antes de guardarla en la base de datos
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(dto.contrasena || '', saltRounds);
+    const hashedPassword = await bcrypt.hash(dto.contrasena, saltRounds);
     dto.contrasena = hashedPassword;
 
     //crea en la db y devuelve el nuevo conductor
@@ -123,31 +131,38 @@ export class ConductorService {
   //Login
   async login(dto: ConductorLoginDTO): Promise<{ token: string }> {
     const errors: string[] = [];
-    //valida que exista un conductor con ese telefono
-    const existing_conductor = await this.repo.findConductorByTelefono(
-      dto.telefono,
-    );
 
-    {
-      //muestra solo un error a la vez, porq es imposible tener los dos al tiempo
-      // es imposible tener la contraseña mala para un telefono q no existe
-      // pero si es posible q el telefono este malo
-      // y q la contraseña este mal para un telefono q si existe
+    if (!dto.correo_electronico && !dto.telefono) {
+      errors.push('Debe proporcionar correo electrónico o teléfono');
     }
-    if (!existing_conductor) {
-      errors.push('Conductor con este telefono no existe');
-    } else {
+
+    let existing_conductor: Conductor | null = null;
+    if (dto.correo_electronico) {
+      existing_conductor = await this.repo.findConductorByCorreoElectronico(dto.correo_electronico);
+      if (!existing_conductor) {
+        errors.push('Conductor con este correo electrónico no existe');
+      }
+    } else if (dto.telefono) {
+      existing_conductor = await this.repo.findConductorByTelefono(dto.telefono);
+      if (!existing_conductor) {
+        errors.push('Conductor con este teléfono no existe');
+      }
+    }
+
+    if (existing_conductor) {
       const isValid = await bcrypt.compare(
         dto.contrasena,
         existing_conductor.contrasena,
       );
       if (!isValid) {
-        errors.push('Contraseña no Valida');
+        errors.push('Contraseña no válida');
       }
     }
+
     if (errors.length > 0) {
       throw new ValidationError(errors);
     }
+
     const payload = {
       sub: existing_conductor!.cedula,
     };
@@ -158,5 +173,58 @@ export class ConductorService {
     });
 
     return { token };
+  }
+
+  //forgot password
+  async forgotPassword(dto: ForgotPasswordDTO): Promise<void> {
+    const conductor = await this.repo.findConductorByCorreoElectronico(dto.correo_electronico);
+    if (!conductor) {
+      throw new ValidationError('Correo electrónico no registrado');
+    }
+
+    const token = crypto.randomBytes(16).toString('hex');
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+
+    await this.repo.setResetToken(dto.correo_electronico, token, expires);
+
+    const emailUser = process.env.EMAIL_USER;
+    const emailPass = process.env.EMAIL_PASS;
+    const frontendUrl = process.env.FRONTEND_URL;
+
+    if (!emailUser || !emailPass) {
+      throw new Error(
+        'No se ha configurado EMAIL_USER o EMAIL_PASS en el archivo .env',
+      );
+    }
+
+    if (!frontendUrl) {
+      throw new Error('No se ha configurado FRONTEND_URL en el archivo .env');
+    }
+
+    // Enviar email
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // o el servicio que uses
+      auth: {
+        user: emailUser,
+        pass: emailPass,
+      },
+    });
+
+    const mailOptions = {
+      from: emailUser,
+      to: dto.correo_electronico,
+      subject: 'Recuperación de contraseña',
+      text: `Usa este enlace para restablecer tu contraseña: ${frontendUrl}/reset-password?token=${token}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+  }
+
+  //reset password
+  async resetPassword(dto: ResetPasswordDTO): Promise<void> {
+    const conductor = await this.repo.resetPassword(dto.token, await bcrypt.hash(dto.nueva_contrasena, 10));
+    if (!conductor) {
+      throw new ValidationError('Token inválido o expirado');
+    }
   }
 }

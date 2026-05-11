@@ -41,16 +41,23 @@ El flujo de datos sigue una arquitectura RESTful:
    npm install
    ```
 
-3. **Configurar Variables de Envono:**
+3. **Configurar Variables de Entorno:**
    Crea un archivo `.env` en la raíz del proyecto basándote en los requerimientos de la aplicación:
 
    ```env
    PORT=3000
    DB_HOST=localhost
-   DB_USER=tu_usuario
-   DB_PASS=tu_contraseña
-   DB_NAME=buscali
-   JWT_SECRET=tu_secreto_para_tokens
+   DB_PORT=5432
+   DB_NAME=buscali_db
+   DB_USER=buscali
+   DB_PASSWORD=buscali-password
+   DB_SSL=false
+   SECRET_JWT_KEY=tu_secreto_para_tokens
+   FRONTEND_URL=http://localhost:5173
+   EMAIL_USER=tu_correo@gmail.com
+   EMAIL_PASS=tu_contraseña_de_app_o_smtp
+   ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+   NODE_ENV=development
    ```
 
 4. **Compilar y ejecutar:**

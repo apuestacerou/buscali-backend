@@ -56,4 +56,22 @@ export class ConductorRepository {
     const deleted = await ConductorModel.destroy({ where: { cedula } });
     return deleted > 0;
   }
+
+  //forgot password: set reset token
+  async setResetToken(correo: string, token: string, expires: Date): Promise<Conductor | null> {
+    const conductor = await ConductorModel.findOne({ where: { correo_electronico: correo } });
+    if (!conductor) return null;
+    await conductor.update({ reset_token: token, reset_expires: expires });
+    return conductor.toJSON() as Conductor;
+  }
+
+  //reset password: find by token and update password
+  async resetPassword(token: string, newPassword: string): Promise<Conductor | null> {
+    const conductor = await ConductorModel.findOne({ where: { reset_token: token } });
+    if (!conductor || !conductor.reset_expires || conductor.reset_expires < new Date()) {
+      return null;
+    }
+    await conductor.update({ contrasena: newPassword, reset_token: null, reset_expires: null });
+    return conductor.toJSON() as Conductor;
+  }
 }
