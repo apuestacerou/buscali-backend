@@ -3,6 +3,7 @@ dotenv.config();
 import express from 'express';
 import conductorRouter from './domains/conductores/routers/conductor-router';
 import rutasRouter from './domains/rutas/routers/ruta-router';
+import usuariosRoutes from './domains/usuarios/routes/usuariosRoutes';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import { sequelize } from './shared/db/database';
@@ -58,6 +59,17 @@ app.get('/health', (_req, res) =>
 app.use('/api/v1/conductores', conductorRouter);
 app.use('/api/v1/rutas', rutasRouter);
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api/v1/usuarios', usuariosRoutes);
+
+app.use((_req, res) => {
+  // Cualquier ruta no definida arriba devuelve 404 con mensaje útil
+  res.status(404).json({
+    error: 'No encontrado',
+    message:
+      'La ruta no existe. Prueba: GET / , GET /health , GET /api/usuarios',
+    path: _req.path,
+  });
+});
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 app.listen(PORT, () => {

@@ -4,7 +4,7 @@
  */
 
 import { Request, Response } from 'express';
-import { Usuario, RolUsuario } from '../models/Usuario';
+import { Usuario, RolUsuario } from '../../../shared/db/models/Usuario';
 import bcrypt from 'bcrypt';
 
 // Vueltas de hashing para bcrypt (a mayor número, más seguro pero más lento)
@@ -71,12 +71,19 @@ export async function crear(req: Request, res: Response): Promise<void> {
       return;
     }
     if (!password || typeof password !== 'string' || password.length < 6) {
-      res.status(400).json({ error: 'La contraseña es obligatoria y debe tener al menos 6 caracteres' });
+      res.status(400).json({
+        error:
+          'La contraseña es obligatoria y debe tener al menos 6 caracteres',
+      });
       return;
     }
     const pwd = password as string;
     // Si el rol viene en el body y es válido, lo usamos; si no, por defecto "pasajero"
-    const rolValido: RolUsuario = ['pasajero', 'conductor', 'administrador'].includes(rol ?? '')
+    const rolValido: RolUsuario = [
+      'pasajero',
+      'conductor',
+      'administrador',
+    ].includes(rol ?? '')
       ? (rol as RolUsuario)
       : 'pasajero';
     // Hasheamos la contraseña para no guardarla en texto plano
@@ -121,14 +128,21 @@ export async function actualizar(req: Request, res: Response): Promise<void> {
       rol?: string;
     };
     if (nombre !== undefined) usuario.nombre = String(nombre).trim();
-    if (email !== undefined) usuario.email = email === '' ? null : String(email).trim();
-    if (telefono !== undefined) usuario.telefono = telefono === '' ? null : String(telefono).trim();
-    if (rol !== undefined && ['pasajero', 'conductor', 'administrador'].includes(rol)) {
+    if (email !== undefined)
+      usuario.email = email === '' ? null : String(email).trim();
+    if (telefono !== undefined)
+      usuario.telefono = telefono === '' ? null : String(telefono).trim();
+    if (
+      rol !== undefined &&
+      ['pasajero', 'conductor', 'administrador'].includes(rol)
+    ) {
       usuario.rol = rol as RolUsuario;
     }
     if (password !== undefined && password !== '') {
       if (password.length < 6) {
-        res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+        res
+          .status(400)
+          .json({ error: 'La contraseña debe tener al menos 6 caracteres' });
         return;
       }
       const pwd = password as string;
