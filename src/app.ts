@@ -62,7 +62,6 @@ app.get('/health', (_req, res) =>
 );
 
 app.use('/api/v1/conductores', conductorRouter);
-app.use('/api/v1/usuarios', usuarioRouter);
 app.use('/api/v1/rutas', rutasRouter);
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/v1/usuarios', usuariosRoutes);
