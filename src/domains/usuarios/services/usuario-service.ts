@@ -6,6 +6,7 @@ import {
   UsuarioLoginDTO,
   ForgotPasswordDTO,
   ResetPasswordDTO,
+  UpdateUsuarioDTO,
 } from '../dto/usuario-dto';
 import {
   ConflictError,
@@ -23,6 +24,15 @@ export class UsuarioService {
    * Valida que el correo y teléfono no estén duplicados, y que se acepten los términos.
    * Hashea la contraseña antes de guardar.
    */
+  async list(): Promise<UsuarioResponseDTO[]> {
+    const usuarios: Usuario[] = await this.repo.findAllUsuarios();
+    //verifica si hay conductores, si no hay lanza un error
+    if (usuarios.length === 0) {
+      throw new ValidationError('Conductores no encontrados');
+    }
+    return usuarios.map((c) => new UsuarioResponseDTO(c));
+  }
+
   async create(dto: CreateUsuarioDTO): Promise<UsuarioResponseDTO> {
     const errors: string[] = [];
 
@@ -44,7 +54,9 @@ export class UsuarioService {
 
     // Validar aceptación de términos
     if (!dto.aceptaTerminos) {
-      errors.push('Es obligatorio aceptar los términos y condiciones para registrarse');
+      errors.push(
+        'Es obligatorio aceptar los términos y condiciones para registrarse',
+      );
     }
 
     if (errors.length > 0) {
@@ -99,7 +111,10 @@ export class UsuarioService {
 
     // Verificar contraseña si el usuario existe
     if (existingUsuario) {
-      const isValid = await bcrypt.compare(dto.password, existingUsuario.password);
+      const isValid = await bcrypt.compare(
+        dto.password,
+        existingUsuario.password,
+      );
       if (!isValid) {
         errors.push('Contraseña no válida');
       }
@@ -163,5 +178,58 @@ export class UsuarioService {
     if (!usuario) {
       throw new ValidationError('Token inválido o expirado');
     }
+  }
+
+  async get(id: number): Promise<UsuarioResponseDTO | null> {
+    const usuario: Usuario | null = await this.repo.findUsuarioById(id);
+    //verifica si el usuario existe, si no existe lanza un error
+    if (!usuario) {
+      throw new ValidationError('Usuario no encontrado');
+    }
+    return usuario ? new UsuarioResponseDTO(usuario) : null;
+  }
+
+  async update(
+    id: number,
+    dto: UpdateUsuarioDTO,
+  ): Promise<UsuarioResponseDTO | null> {
+    const errors: string[] = [];
+    //valida que no exista un conductor con el mismo correo_electronico
+    // const existing_correo_electronico =
+    //   await this.repo.findUsuarioByCorreoElectronico(
+    //     dto.correo_electronico || '',
+    //   );
+    // if (existing_correo_electronico) {
+    //   errors.push('Conductor con este correo electronico ya existe');
+    // }
+    //valida que no exista un conductor con el mismo telefono
+    const existing_telefono = await this.repo.findUsuarioByTelefono(
+      dto.telefono || '',
+    );
+    if (existing_telefono) {
+      errors.push('Conductor con este telefono ya existe');
+    }
+    if (errors.length > 0) {
+      throw new ConflictError(errors);
+    }
+
+    //actualiza en la db y devuelve el conductor
+    const usuario: Usuario | null = await this.repo.findUsuarioById(id);
+    //verifica si el conductor existe, si no existe lanza un error
+    if (!usuario) {
+      throw new ValidationError('Usuario no encontrado');
+    }
+
+    const updated = await this.repo.updateUsuario(id, dto);
+    return updated ? new UsuarioResponseDTO(updated) : null;
+  }
+
+  async delete(id: number): Promise<boolean> {
+    const usuario: Usuario | null = await this.repo.findUsuarioById(id);
+    //verifica si el conductor existe, si no existe lanza un error
+    if (!usuario) {
+      throw new ValidationError('Usuario no encontrado');
+    }
+    return await this.repo.deleteUsuario(id);
   }
 }
