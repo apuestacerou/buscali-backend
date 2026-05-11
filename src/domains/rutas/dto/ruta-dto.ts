@@ -24,12 +24,12 @@ class NodoDto {
   @IsNumber({}, { message: 'Latitud debe ser numérica' })
   @IsNotEmpty()
   @IsLatitude()
-  lat!: number;
+  lat?: number;
 
   @IsNumber({}, { message: 'Longitud debe ser numérica' })
   @IsNotEmpty()
   @IsLongitude()
-  lng!: number;
+  lng?: number;
 }
 
 // DTO para crear un cliente
@@ -181,7 +181,10 @@ export class UpdateRutaDTO {
     message: 'Una ruta debe tener al menos 2 puntos/nodos (inicio y fin)',
   })
   // Validamos que sea un array de arrays de números: [[lng, lat], [lng, lat]]
-  coordenadas?: [number, number][];
+  //transformr al formato geojson en el services
+  @ValidateNested({ each: true })
+  @Type(() => NodoDto)
+  coordenadas!: NodoDto[];
 
   @IsHexColor()
   colorhex!: string;

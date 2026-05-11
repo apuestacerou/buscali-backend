@@ -37,21 +37,6 @@ export class RutaRepository {
   async findRutaByEmpresa(id_empresa: string): Promise<Ruta | null> {
     return this.findRuta({ id_empresa });
   }
-  // coordenadas
-  async findRutaByCoordenadas(coordenadas: string): Promise<Ruta | null> {
-    return this.findRuta({ coordenadas });
-  }
-
-  //desacoplar
-  async findEmpresaByNombre(nombre_empresa: string): Promise<string | null> {
-    const empresa = await EmpresaModel.findOne({ where: { nombre_empresa } });
-    return empresa ? empresa.id_empresa : null;
-  }
-  //desacoplar
-  async findEmpresaById(id_empresa: string): Promise<string | null> {
-    const empresa = await EmpresaModel.findByPk(id_empresa);
-    return empresa ? empresa.nombre_empresa : null;
-  }
 
   async findDuplicateRoute(id_empresa: string, geoJson: any) {
     return await RutaModel.findOne({
@@ -91,8 +76,8 @@ export class RutaRepository {
   }
 
   //eliminar ruta
-  async deleteRuta(nombre_ruta: string): Promise<boolean> {
-    const deleted = await RutaModel.destroy({ where: { nombre_ruta } });
-    return deleted > 0;
-  }
+  // async deleteRuta(nombre_ruta: string): Promise<boolean> {
+  //   const deleted = await RutaModel.destroy({ where: { nombre_ruta } });
+  //   return deleted > 0;
+  // }
 }

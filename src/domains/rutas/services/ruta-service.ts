@@ -1,4 +1,5 @@
 import { RutaRepository } from '../repositories/ruta-repository';
+import { EmpresaRepository } from '../../empresas/repositories/empresa_repository';
 import { Ruta } from '../types/ruta';
 import { CreateRutaDTO, UpdateRutaDTO, RutaResponseDTO } from '../dto/ruta-dto';
 import {
@@ -8,6 +9,7 @@ import {
 
 export class RutaService {
   private repo = new RutaRepository();
+  private repoEmpresa = new EmpresaRepository();
 
   //obtener todos los ruta
   async list(): Promise<RutaResponseDTO[]> {
@@ -32,7 +34,7 @@ export class RutaService {
 
   async getByEmpresa(nombreEmpresa: string): Promise<RutaResponseDTO | null> {
     const id_empresa: string | null =
-      await this.repo.findEmpresaByNombre(nombreEmpresa);
+      await this.repoEmpresa.findEmpresaByNombre(nombreEmpresa);
     //verifica si la ruta existe, si no existe lanza un error
     if (!id_empresa) {
       throw new ValidationError('Ruta no encontrada para esta empresa');
@@ -59,7 +61,7 @@ export class RutaService {
     //valida que no exista un ruta con la misma nombre_ruta
     const errors: string[] = [];
 
-    const empresa_ruta = await this.repo.findEmpresaByNombre(
+    const empresa_ruta = await this.repoEmpresa.findEmpresaByNombre(
       dto.nombre_empresa,
     );
 
@@ -104,28 +106,59 @@ export class RutaService {
   }
 
   //actualizar ruta
-  // async update(
-  //   nombre_ruta: string,
-  //   dto: UpdateRutaDTO,
-  // ): Promise<RutaResponseDTO | null> {
-  //   const errors: string[] = [];
+  async update(
+    nombre_ruta: string,
+    dto: UpdateRutaDTO,
+  ): Promise<RutaResponseDTO | null> {
+    const errors: string[] = [];
 
-  //   //verificar que no exista una ruta de la misma empresa con las mismas coordenadas
+    // Obtener la ruta existente por nombre para conseguir su id
+    const ruta: Ruta | null = await this.repo.findRutaByNombre(nombre_ruta);
+    if (!ruta) {
+      throw new ValidationError('Ruta no encontrado');
+    }
 
-  //   if (errors.length > 0) {
-  //     throw new ConflictError(errors);
-  //   }
+    const existing_nombre = await this.repo.findRutaByNombre(nombre_ruta);
+    if (existing_nombre && existing_nombre.nombre_ruta !== nombre_ruta) {
+      throw new ValidationError('Ruta con este nombre ya existe');
+    }
 
-  //   //actualiza en la db y devuelve el ruta
-  //   const ruta: Ruta | null = await this.repo.findRutaByNombre(nombre_ruta);
-  //   //verifica si el ruta existe, si no existe lanza un error
-  //   if (!ruta) {
-  //     throw new ValidationError('Ruta no encontrado');
-  //   }
+    const existing_destino = await this.repo.findRutaByDestino(
+      dto.destino || '',
+    );
+    if (existing_destino) {
+      throw new ValidationError('Ruta con este destino ya existe');
+    }
 
-  //   const updated = await this.repo.updateRuta(nombre_ruta, dto);
-  //   return updated ? new RutaResponseDTO(updated) : null;
-  // }
+    // Si se está actualizando el nombre de la empresa, verificar que exista
+    const geoJson = {
+      type: 'LineString' as const,
+      coordinates: dto.coordenadas?.map(
+        (p) => [p.lng, p.lat] as [number, number],
+      ),
+    };
+    //verificar que no exista una ruta de la misma empresa con las mismas coordenadas
+    const existing_ruta = await this.repo.findDuplicateRoute(
+      dto.id_empresa!,
+      geoJson,
+    );
+    if (existing_ruta) {
+      throw new ValidationError(
+        'Ya existe una ruta con este trayecto exacto para esta empresa',
+      );
+    }
+
+    if (errors.length > 0) {
+      throw new ConflictError(errors);
+    }
+
+    // Actualizar usando el id_ruta y pasando datos transformados
+    const updated = await this.repo.updateRuta(ruta.id_ruta, {
+      ...dto,
+      coordenadas: geoJson,
+    });
+    return updated ? new RutaResponseDTO(updated) : null;
+  }
 
   //eliminar ruta por nombre_ruta
   // async delete(nombre_ruta: string): Promise<boolean> {
@@ -135,44 +168,5 @@ export class RutaService {
   //     throw new ValidationError('Ruta no encontrado');
   //   }
   //   return await this.repo.deleteRuta(nombre_ruta);
-  // }
-  //Login
-  // async login(dto: RutaLoginDTO): Promise<{ token: string }> {
-  //   const errors: string[] = [];
-  //   //valida que exista un ruta con ese destino
-  //   const existing_ruta = await this.repo.findRutaByDestino(
-  //     dto.destino,
-  //   );
-
-  //   {
-  //     //muestra solo un error a la vez, porq es imposible tener los dos al tiempo
-  //     // es imposible tener la contraseña mala para un destino q no existe
-  //     // pero si es posible q el destino este malo
-  //     // y q la contraseña este mal para un destino q si existe
-  //   }
-  //   if (!existing_ruta) {
-  //     errors.push('Ruta con este destino no existe');
-  //   } else {
-  //     const isValid = await bcrypt.compare(
-  //       dto.contrasena,
-  //       existing_ruta.contrasena,
-  //     );
-  //     if (!isValid) {
-  //       errors.push('Contraseña no Valida');
-  //     }
-  //   }
-  //   if (errors.length > 0) {
-  //     throw new ValidationError(errors);
-  //   }
-  //   const payload = {
-  //     sub: existing_ruta!.nombre_ruta,
-  //   };
-  //   //jwt firmado
-  //   // contenido, firma y expiracion
-  //   const token = jwt.sign({ payload }, process.env.SECRET_JWT_KEY!, {
-  //     expiresIn: '1h',
-  //   });
-
-  //   return { token };
   // }
 }
