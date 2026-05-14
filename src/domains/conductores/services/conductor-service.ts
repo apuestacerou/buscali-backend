@@ -23,9 +23,8 @@ export class ConductorService {
   //obtener todos los conductores
   async list(): Promise<ConductorResponseDTO[]> {
     const conductores: Conductor[] = await this.repo.findAllConductores();
-    //verifica si hay conductores, si no hay lanza un error
     if (conductores.length === 0) {
-      throw new ValidationError('Conductores no encontrados');
+      return [];
     }
     return conductores.map((c) => new ConductorResponseDTO(c));
   }
@@ -87,34 +86,48 @@ export class ConductorService {
     dto: UpdateConductorDTO,
   ): Promise<ConductorResponseDTO | null> {
     const errors: string[] = [];
-    //valida que no exista un conductor con el mismo correo_electronico
-    const existing_correo_electronico =
-      await this.repo.findConductorByCorreoElectronico(
-        dto.correo_electronico || '',
+
+    if (dto.correo_electronico?.trim()) {
+      const otro = await this.repo.findConductorByCorreoElectronico(
+        dto.correo_electronico.trim(),
       );
-    if (existing_correo_electronico) {
-      errors.push('Conductor con este correo electronico ya existe');
+      if (otro && otro.cedula !== cedula) {
+        errors.push('Conductor con este correo electronico ya existe');
+      }
     }
-    //valida que no exista un conductor con el mismo telefono
-    const existing_telefono = await this.repo.findConductorByTelefono(
-      dto.telefono || '',
-    );
-    if (existing_telefono) {
-      errors.push('Conductor con este telefono ya existe');
+    if (dto.telefono?.trim()) {
+      const tel = dto.telefono.replace(/\D/g, '');
+      const otro = await this.repo.findConductorByTelefono(tel);
+      if (otro && otro.cedula !== cedula) {
+        errors.push('Conductor con este telefono ya existe');
+      }
     }
+
     if (errors.length > 0) {
       throw new ConflictError(errors);
     }
 
-    //actualiza en la db y devuelve el conductor
     const conductor: Conductor | null =
       await this.repo.findConductorByCedula(cedula);
-    //verifica si el conductor existe, si no existe lanza un error
     if (!conductor) {
       throw new ValidationError('Conductor no encontrado');
     }
 
-    const updated = await this.repo.updateConductor(cedula, dto);
+    const patch: Partial<Conductor> = {};
+    if (dto.nombre != null && String(dto.nombre).trim() !== '') {
+      patch.nombre = dto.nombre.trim();
+    }
+    if (dto.correo_electronico != null && String(dto.correo_electronico).trim() !== '') {
+      patch.correo_electronico = dto.correo_electronico.trim();
+    }
+    if (dto.telefono != null && String(dto.telefono).trim() !== '') {
+      patch.telefono = dto.telefono.replace(/\D/g, '');
+    }
+    if (dto.estado === 'Activo' || dto.estado === 'Inactivo') {
+      patch.estado = dto.estado;
+    }
+
+    const updated = await this.repo.updateConductor(cedula, patch);
     return updated ? new ConductorResponseDTO(updated) : null;
   }
 

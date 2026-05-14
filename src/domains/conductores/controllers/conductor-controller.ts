@@ -59,11 +59,12 @@ export async function createConductor(
     );
     await checkDto(dto);
 
+    const contrasenaPlano = (req.body as { contrasena?: string }).contrasena;
     const newConductor = await service.create(dto);
-    // Auto login después del registro
+    // Auto login después del registro (service.create deja dto.contrasena hasheada)
     const loginDto: ConductorLoginDTO = {
       telefono: dto.telefono,
-      contrasena: dto.contrasena,
+      contrasena: contrasenaPlano ?? '',
     };
     const login = await service.login(loginDto);
     // seteo de cookie segura
@@ -140,7 +141,9 @@ export async function loginConductor(
       sameSite: 'strict', // solo desde el mismo dominio
       // maxAge: 1000 * 60 * 60 // opcional: 1 hora
     });
-    return sendSuccess(res, 200, 'Sesión iniciada correctamente');
+    return sendSuccess(res, 200, 'Sesión iniciada correctamente', {
+      token: login.token,
+    });
   } catch (error) {
     next(error);
   }

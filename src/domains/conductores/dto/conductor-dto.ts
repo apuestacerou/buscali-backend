@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   Matches,
   IsBoolean,
+  ValidateIf,
 } from 'class-validator';
 
 // DTO para crear un cliente
@@ -55,24 +56,28 @@ export class CreateConductorDTO {
 
 // DTO para actualizar un conductor
 export class UpdateConductorDTO {
-  @IsOptional() // Permite que el campo sea opcional al actualizar un conductor
+  @IsOptional()
+  @ValidateIf((_, v) => v != null && String(v).trim() !== '')
   @Matches(/\S/, { message: 'El nombre no puede ser solo espacios' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, {
     message: 'Nombre solo puede contener letras y espacios',
-  }) // Validación para permitir solo letras y espacios
+  })
   nombre?: string;
 
-  @IsOptional() // Permite que el campo sea opcional al actualizar un conductor
-  @IsEmail({}, { message: 'Formato de correo electrónico inválido' }) // Validación para formato de correo electrónico
+  @IsOptional()
+  @ValidateIf((_, v) => v != null && String(v).trim() !== '')
+  @IsEmail({}, { message: 'Formato de correo electrónico inválido' })
   correo_electronico?: string;
 
-  @IsOptional() // Permite que el campo sea opcional al actualizar un conductor
+  @IsOptional()
+  @ValidateIf((_, v) => v != null && String(v).trim() !== '')
   @Matches(/^\+?[0-9]{7,15}$/, {
     message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos',
-  }) // Validación para permitir solo dígitos en el teléfono
+  })
   telefono?: string;
 
-  @IsOptional() // Permite que el campo sea opcional al actualizar un conductor
+  @IsOptional()
+  @ValidateIf((_, v) => v != null && String(v).trim() !== '')
   @IsEnum(['Activo', 'Inactivo'], {
     message: 'Estado debe ser "Activo" o "Inactivo"',
   })

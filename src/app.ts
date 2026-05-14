@@ -70,6 +70,21 @@ app.use(cookieParser());
 // Ruta de la documentación Swagger apuntada al archivo YAML en su ubicacion despues de compilar a dist/docs
 const swaggerDocument = YAML.load('./src/apis/apis.yaml');
 
+// Raíz: info del API (evita 404 al abrir http://localhost:PUERTO/ en el navegador)
+app.get('/', (_req, res) => {
+  res.json({
+    service: 'BusCali Backend',
+    message: 'API activa. Usa rutas bajo /api/v1/…',
+    endpoints: {
+      health: 'GET /health',
+      docs: 'GET /api/v1/docs',
+      conductores: 'POST /api/v1/conductores/login',
+      rutas: 'GET /api/v1/rutas',
+      usuarios: 'POST /api/v1/usuarios/login',
+    },
+  });
+});
+
 // Health check
 app.get('/health', (_req, res) =>
   res.json({ status: 'OK', service: 'conductores-service' }),
@@ -85,7 +100,7 @@ app.use((_req, res) => {
   res.status(404).json({
     error: 'No encontrado',
     message:
-      'La ruta no existe. Prueba: GET / , GET /health , GET /api/v1/rutas',
+      'La ruta no existe. Prueba: GET / , GET /health , GET /api/v1/docs',
     path: _req.path,
   });
 });
