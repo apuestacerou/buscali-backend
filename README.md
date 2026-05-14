@@ -1,53 +1,108 @@
-# Buscali Backend
+# BusCali 🚌
 
-Buscali es una aplicación diseñada para mejorar la movilidad urbana mediante el seguimiento en tiempo real de rutas de transporte público. Este repositorio contiene el backend del sistema, desarrollado con Node.js y Sequelize, conectado a una base de datos relacional Postgres y complementado con una base NoSQL para el manejo de coordenadas GPS.
+> El mejor backend del universo para la movilidad urbana en Santiago de Cali.
 
-## 🚀 Funcionalidades principales
+BusCali es una plataforma integral diseñada para optimizar la experiencia de transporte público en la ciudad. Este repositorio contiene el **Backend**, un servicio robusto construido con **Node.js** y **TypeScript** que centraliza las reglas de negocio, la persistencia de datos geográficos y la autenticación tanto para la App Móvil (Usuarios) como para el Panel Web (Administradores).
 
-- **Gestión de usuarios y conductores**  
-  Registro, autenticación y administración de perfiles con roles diferenciados (pasajero, conductor, administrador).
+## 🏗️ Arquitectura del Sistema
 
-- **Seguimiento en tiempo real**  
-  Visualización de la ubicación de vehículos en el mapa, con actualización automática de datos GPS.
+El proyecto se basa en un modelo de **Backend Monolítico** con servicios de frontend independientes, permitiendo una gestión centralizada de la lógica de movilidad.
 
-- **Historial de búsquedas**  
-  Consulta de trayectos frecuentes y búsquedas recientes asociadas a cada usuario.
+- **Stack Principal:** Node.js + Express + TypeScript.
+- **Persistencia:** - **PostgreSQL**: Base de datos relacional gestionada a través de **Sequelize** (Modelos y Migraciones).
+- **Seguridad:** Autenticación basada en **JWT** (JSON Web Tokens) y cifrado de datos sensibles con **bcrypt**.
+- **Geolocalización:** Almacenamiento de coordenadas en formato **GeoJSON** en la base de datos, consumidas por el frontend mediante la API de Google Maps.
 
-- **Visualización de rutas**  
-  Acceso al trayecto completo de cada ruta registrada en el sistema.
+### Diagrama de Comunicación
 
-- **Seguridad y autenticación**  
-  Contraseñas temporales generadas en el backend, cifrado de credenciales y control de sesiones activas.
+El flujo de datos sigue una arquitectura RESTful:
 
-## 🗂️ Arquitectura de datos
+1. **App Móvil (React Native):** Interfaz para el ciudadano de Cali.
+2. **Panel Web (React):** Herramienta de gestión para administradores del sistema.
 
-- **Postgres (relacional)**  
-  - Usuarios  
-  - Conductores  
-  - Rutas  
-  - Historial de búsquedas  
-  - Sesiones  
+## 🚀 1. Instalación y Configuración
 
-- **NoSQL (MongoDB u otro)**  
-  - Trayectos (coordenadas de rutas)  
-  - Ubicaciones en tiempo real (GPS de conductores)  
+### Requisitos previos
 
-## ⚙️ Tecnologías utilizadas
+- **Node.js** (v18.x o superior)
+- **npm** (v9.x o superior)
+- Instancias locales o remotas de **PostgreSQL**.
 
-- Node.js  
-- Express  
-- Sequelize (ORM)  
-- Postgres (Neon)  
-- MongoDB (para datos geoespaciales)  
-- OpenStreetMap o Google Maps
+1. **Clonar el repositorio:**
 
-## 📌 Casos de uso documentados
+   ```bash
+   git clone https://github.com/apuestacerou/buscali-backend.git
+   cd buscali-backend
+   ```
 
-El proyecto cuenta con casos de uso que describen la interacción de actores con el sistema y los procesos internos del servidor, incluyendo validaciones, consultas y transmisión de datos GPS.
+2. **Instalar dependencias:**
 
-## 📈 Estado del proyecto
+   ```bash
+   npm install
+   ```
 
-Actualmente en desarrollo, con el backend en construcción y la integración de servicios de geolocalización y geocodificación.
+3. **Configurar Variables de Entorno:**
+   Crea un archivo `.env` en la raíz del proyecto basándote en los requerimientos de la aplicación:
 
+   ```env
+   PORT=3000
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=buscali_db
+   DB_USER=buscali
+   DB_PASSWORD=buscali-password
+   DB_SSL=false
+   SECRET_JWT_KEY=tu_secreto_para_tokens
+   FRONTEND_URL=http://localhost:5173
+   EMAIL_USER=tu_correo@gmail.com
+   EMAIL_PASS=tu_contraseña_de_app_o_smtp
+   ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+   NODE_ENV=development
+   ```
 
+4. **Compilar y ejecutar:**
+   Para desarrollo con recarga automática:
+   ```bash
+   npm run dev
+   ```
+   Para generar el build de producción:
+   ```bash
+   npm run build
+   ```
 
+## 🛠️ 2. Convenciones de Desarrollo y Git Flow
+
+Para mantener la integridad del código en un entorno colaborativo de ingeniería, se establecen las siguientes normas:
+
+### Estrategia de Ramas (Git Flow)
+
+Se utiliza un flujo basado en ramas para separar el código estable del desarrollo activo:
+
+- **`main`**: Rama de producción. Solo se fusiona código que ha sido probado y es 100% estable.
+- **`develop`**: Rama principal de desarrollo. Todos los cambios terminados se integran aquí.
+- **`feature/[nombre-tarea]`**: Ramas de corta duración creadas a partir de `develop`. Ejemplo: `feature/auth-jwt` o `feature/map-integration`.
+
+### Estándar de Mensajes de Commit
+
+Es obligatorio el uso de **Conventional Commits** para facilitar la lectura del historial:
+
+- `feat:` Cuando agregas una nueva funcionalidad.
+- `fix:` Cuando corriges un error en el código.
+- `docs:` Cambios únicamente en archivos de documentación.
+- `chore:` Tareas de mantenimiento (actualizar `package.json`, configurar `tsconfig.json`).
+
+---
+
+## 📍 3. Estado del Proyecto (Roadmap)
+
+Actualmente nos encontramos en la fase de **MVP (Producto Mínimo Viable)** para la App Móvil.
+
+- [x] Configuración inicial del servidor Express con TypeScript.
+- [x] Modelado de base de datos relacional (PostgreSQL).
+- [x] Implementación de autenticación con JWT y Bcrypt.
+- [ ] Integración de mapas y visualización de rutas (En proceso).
+- [ ] Panel administrativo web (Pendiente).
+
+---
+
+**BusCali Backend** - _El mejor backend del universo._

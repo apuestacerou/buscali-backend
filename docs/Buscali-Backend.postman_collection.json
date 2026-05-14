@@ -1,0 +1,78 @@
+{
+  "info": {
+    "name": "Buscali Backend - Usuarios API",
+    "description": "Pruebas de conexión a la BD y CRUD de usuarios. Servidor: npm run dev en buscali-backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" }
+  ],
+  "item": [
+    {
+      "name": "1. Health (servidor OK)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health",
+        "description": "Comprueba que el servidor responde. Esperado: 200, { \"ok\": true }"
+      }
+    },
+    {
+      "name": "2. Listar usuarios (probar BD)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/usuarios",
+        "description": "Consulta la BD. Si responde 200 y un array (aunque sea []), la conexión a la base de datos está bien."
+      }
+    },
+    {
+      "name": "3. Crear usuario (POST)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Usuario Prueba\",\n  \"email\": \"prueba@buscali.com\",\n  \"telefono\": \"3001234567\",\n  \"password\": \"clave123\",\n  \"rol\": \"pasajero\"\n}"
+        },
+        "url": "{{baseUrl}}/api/usuarios",
+        "description": "Crea un usuario en la BD. Esperado: 201 y el objeto usuario creado (con id, sin passwordHash)."
+      }
+    },
+    {
+      "name": "4. Obtener usuario por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/usuarios/1",
+        "description": "Obtiene el usuario con id 1. Cambia el 1 por otro id si hace falta."
+      }
+    },
+    {
+      "name": "5. Actualizar usuario (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Nombre Actualizado\",\n  \"email\": \"nuevo@buscali.com\"\n}"
+        },
+        "url": "{{baseUrl}}/api/usuarios/1",
+        "description": "Actualiza el usuario con id 1. Cambia el body y el id en la URL según necesites."
+      }
+    },
+    {
+      "name": "6. Eliminar usuario (DELETE)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/usuarios/1",
+        "description": "Elimina el usuario con id 1. Esperado: 204 sin cuerpo. Cambia el id en la URL si hace falta."
+      }
+    }
+  ]
+}
