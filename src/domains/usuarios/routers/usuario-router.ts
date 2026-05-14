@@ -14,7 +14,8 @@ import {
 
 const router = Router();
 
-router.post('/', jwtAuth, requireAuth, createUsuario);
+/** Registro público (sin sesión previa). */
+router.post('/', createUsuario);
 router.post('/login', loginUsuario);
 router.post('/forgot-password', forgotPasswordUsuario);
 router.post('/reset-password', jwtAuth, requireAuth, resetPasswordUsuario);

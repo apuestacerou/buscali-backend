@@ -85,7 +85,9 @@ export class UsuarioService {
    * Permite login por correo o teléfono.
    * Valida credenciales y genera un JWT token.
    */
-  async login(dto: UsuarioLoginDTO): Promise<{ token: string }> {
+  async login(
+    dto: UsuarioLoginDTO,
+  ): Promise<{ token: string; usuario: UsuarioResponseDTO }> {
     const errors: string[] = [];
 
     // Verificar que se proporcione al menos correo o teléfono
@@ -133,7 +135,10 @@ export class UsuarioService {
       expiresIn: '3h',
     });
 
-    return { token };
+    return {
+      token,
+      usuario: new UsuarioResponseDTO(existingUsuario!),
+    };
   }
 
   /**

@@ -90,7 +90,10 @@ export async function loginUsuario(
       sameSite: 'strict',
     });
     console.log('Login exitoso');
-    return sendSuccess(res, 200, 'Sesión iniciada correctamente');
+    return sendSuccess(res, 200, 'Sesión iniciada correctamente', {
+      token: login.token,
+      usuario: login.usuario,
+    });
   } catch (error) {
     console.error('Error en login:', error);
     next(error);
