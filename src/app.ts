@@ -1,66 +1,102 @@
-/**
- * Punto de entrada del backend Buscali.
- * Carga variables de entorno, configura Express, monta rutas e inicia el servidor.
- */
-
-import 'dotenv/config';
-import 'reflect-metadata';
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
-import { sequelize } from './config/database';
-import usuariosRoutes from './routes/usuariosRoutes';
-import authRoutes from './routes/authRoutes';
+import conductorRouter from './domains/conductores/routers/conductor-router';
+import rutasRouter from './domains/rutas/routers/ruta-router';
+import usuariosRoutes from './domains/usuarios/routers/usuario-router';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+import { sequelize } from './shared/db/database';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+//middleware's
+import { errorHandler } from './shared/middlewares/errorHandler';
+
+async function bootstrap() {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' }); // sincroniza modelos con la BD en entorno de desarrollo
+    console.log('DB connected');
+    console.log(
+      `\n✅ Buscali Backend Service running on http://localhost:${PORT}\n`,
+    );
+    console.log(`📍 Available Endpoints:\n`);
+    console.log(
+      `   🚗 POST   /api/v1/conductores          - Conductores Management`,
+    );
+    console.log(
+      `   👤 POST   /api/v1/usuarios             - User Registration & Login`,
+    );
+    console.log(
+      `   🛣️  GET   /api/v1/rutas                - Routes Management`,
+    );
+    console.log(
+      `   📚 GET   /api/v1/docs                  - Swagger Documentation\n`,
+    );
+    console.log(`✨ Ready to accept requests!\n`);
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+    throw error; // Throw to prevent app from starting
+  }
+}
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
+// Configurar Express para devolver JSON formateado (pretty print)
+// 2 espacios de indentación para mejor legibilidad
+app.set('json spaces', 2);
+
+// Middleware's
 app.use(express.json());
 
-app.get('/', (_req, res) => {
-  // Ruta raíz: devuelve info del API y endpoints disponibles
-  res.json({
-    service: 'Buscali Backend',
-    message: 'API de movilidad urbana - Cali',
-    endpoints: {
-      health: 'GET /health',
-      authLogin: 'POST /api/auth/login',
-      usuarios: 'GET, POST /api/usuarios',
-      usuarioPorId: 'GET, PUT, DELETE /api/usuarios/:id',
+//middleware CORS solo permite peticiones desde produccion, local y peticiones como postman
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || process.env.ALLOWED_ORIGINS?.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('No permitido por CORS'));
+      }
     },
-  });
-});
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  }),
+);
 
-app.get('/health', (_req, res) => {
-  res.json({ ok: true, service: 'buscali-backend' });
-});
+// mmiddleware cookie-parser para usar cookies
+app.use(cookieParser());
 
-app.use('/api/auth', authRoutes);
-app.use('/api/usuarios', usuariosRoutes);
+// Ruta de la documentación Swagger apuntada al archivo YAML en su ubicacion despues de compilar a dist/docs
+const swaggerDocument = YAML.load('./src/apis/apis.yaml');
+
+// Health check
+app.get('/health', (_req, res) =>
+  res.json({ status: 'OK', service: 'conductores-service' }),
+);
+
+app.use('/api/v1/conductores', conductorRouter);
+app.use('/api/v1/rutas', rutasRouter);
+app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api/v1/usuarios', usuariosRoutes);
 
 app.use((_req, res) => {
   // Cualquier ruta no definida arriba devuelve 404 con mensaje útil
   res.status(404).json({
     error: 'No encontrado',
-    message: 'La ruta no existe. Prueba: GET / , GET /health , POST /api/auth/login , GET /api/usuarios',
+    message:
+      'La ruta no existe. Prueba: GET / , GET /health , GET /api/v1/rutas',
     path: _req.path,
   });
 });
 
-async function start() {
-  try {
-    await sequelize.authenticate();
-    console.log('✅ Conexión a Postgres (Neon) correcta');
-    // alter: aplica cambios del modelo a la tabla (p. ej. columna apellido). En producción conviene migraciones SQL explícitas.
-    await sequelize.sync({ alter: true });
-    console.log('✅ Tablas sincronizadas');
-  } catch (e) {
-    console.error('❌ Error al conectar con la base de datos:', e);
-    process.exit(1);
-  }
-  app.listen(PORT, () => {
-    console.log(`🚀 Servidor en http://localhost:${PORT}`);
-  });
-}
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log('Starting up... Connecting to database...');
+});
+bootstrap();
 
-// Arrancamos el servidor al cargar este archivo
-
-start();
+//middleware para manejar errores
+app.use(errorHandler);
+export default app;

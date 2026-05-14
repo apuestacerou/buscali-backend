@@ -1,0 +1,58 @@
+@startuml
+!theme materia-outline
+
+title Arquitectura - Flujo de Comunicación
+
+node "Servidor de Aplicación (Node.js + TS)" as Server {
+    [API REST (Express)] as API
+    [Controladores Admin] as AdminCtrl
+    [Controladores App] as UserCtrl
+    [Middlewares Auth (JWT)] as Middleware
+}
+
+package "Infraestructura de Datos" as db {
+    database "PostgreSQL (Relacional)" as Postgres
+    database "MongoDB (Documental)" as Mongo
+}
+
+package "Clientes Externos" as front {
+    [Página Web (React)] as WebAdmin
+    [App Móvil (React Native)] as MobileApp
+    
+}
+note right of front
+        Estos son los dos ambientes de FrontEnd:
+        la app movil (Usuarios finales) y 
+        la página web (Administradores)
+end note
+
+' Comunicaciones Externas (REST)
+WebAdmin --( Axios : "HTTPS/REST"
+Axios --> API
+
+MobileApp --( Fetch_Axios : "HTTPS/REST"
+Fetch_Axios --> API
+
+' Flujo Interno del Backend
+API --> Middleware : "Valida JWT"
+Middleware --> AdminCtrl
+Middleware --> UserCtrl
+
+' Persistencia mediante ORM/ODM
+AdminCtrl --> Postgres
+AdminCtrl --> Mongo 
+UserCtrl --> Postgres 
+UserCtrl --> Mongo 
+
+note right of Server
+  El Backend centraliza las reglas.
+  Usa DTOs para filtrar qué datos
+  van a la App vs la Web.
+end note
+
+note right of db
+el back se comunica con PostgreSQL por Sequelize
+y  con mongo por Mongoose
+end note
+
+@enduml

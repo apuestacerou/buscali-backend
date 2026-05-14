@@ -2,15 +2,16 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
+    "typeRoots": ["src/shared/types", "./node_modules/@types"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "src",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*", "docs/**/*"],
+  "include": ["src/**/*", "src/shared/errors"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
