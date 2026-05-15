@@ -41,6 +41,7 @@ async function bootstrap() {
 }
 
 const app = express();
+app.set('trust proxy', true);
 
 // Configurar Express para devolver JSON formateado (pretty print)
 // 2 espacios de indentación para mejor legibilidad
