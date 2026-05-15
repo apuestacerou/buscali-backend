@@ -86,7 +86,7 @@ export async function loginUsuario(
     const login = await service.login(dto);
     res.cookie('access_token', login.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'none',
     });
     console.log('Login exitoso');
