@@ -137,8 +137,8 @@ export async function loginConductor(
     // seteo de cookie segura
     res.cookie('access_token', login.token, {
       httpOnly: true, // solo accesible desde el servidor
-      secure: process.env.NODE_ENV === 'production', // solo por https en producción
-      sameSite: 'strict', // solo desde el mismo dominio
+      secure: true, // solo por https en producción
+      sameSite: 'none', // solo desde el mismo dominio
       // maxAge: 1000 * 60 * 60 // opcional: 1 hora
     });
     return sendSuccess(res, 200, 'Sesión iniciada correctamente', {
@@ -158,8 +158,8 @@ export async function logoutConductor(
     // Borra la cookie que guarda el JWT
     res.clearCookie('access_token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // usa true si estás en HTTPS en producción
-      sameSite: 'strict',
+      secure: true, // usa true si estás en HTTPS en producción
+      sameSite: 'none',
     });
     // Limpia el estado de autenticación en el request
     req.auth = null;
