@@ -7,6 +7,13 @@ import { Usuario } from './models/Usuario';
 const sequelize = new Sequelize(process.env.DATABASE_URL!, {
   dialect: 'postgres',
   timezone: process.env.TIMEZONE,
+  /** Neon/servidor Postgres en la nube suelen cortar conexiones inactivas (ECONNRESET); el pool reduce fallos. */
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 60000,
+    idle: 10000,
+  },
   dialectOptions: {
     ssl: {
       require: true,

@@ -6,6 +6,40 @@ import {
   ConflictError,
   ValidationError,
 } from '../../../shared/errors/error.class';
+import {
+  closestPointOnPolylineM,
+  minDistanceToPolylineM,
+  parseLineStringCoords,
+} from '../utils/ruta-geometry';
+
+export type RutaSugeridaDTO = {
+  id_ruta: string;
+  nombre_ruta: string;
+  destino: string;
+  nombre_empresa: string;
+  /** Suma de distancias mínimas (m) desde origen y destino del usuario al trazado de la ruta; menor = más adecuada. */
+  proximidad_total_m: number;
+  coordenadas: { type: 'LineString'; coordinates: [number, number][] };
+  colorhex: string;
+};
+
+export type PuntoParadaDTO = {
+  latitud: number;
+  longitud: number;
+  distancia_desde_referencia_m: number;
+};
+
+export type PuntosAccesoRutaDTO = {
+  id_ruta: string;
+  nombre_ruta: string;
+  /** Trazado completo de la ruta (GeoJSON LineString, SRID 4326). */
+  coordenadas: { type: 'LineString'; coordinates: [number, number][] };
+  colorhex: string;
+  /** Proyección del origen del usuario sobre el trazado (donde conviene acercarse a la ruta para subir). */
+  parada_subida: PuntoParadaDTO;
+  /** Proyección del destino del usuario sobre el trazado (donde conviene descender). */
+  parada_bajada: PuntoParadaDTO;
+};
 
 export class RutaService {
   private repo = new RutaRepository();
@@ -14,11 +48,88 @@ export class RutaService {
   //obtener todos los ruta
   async list(): Promise<RutaResponseDTO[]> {
     const ruta: Ruta[] = await this.repo.findAllRutas();
-    //verifica si hay ruta, si no hay lanza un error
     if (ruta.length === 0) {
-      throw new ValidationError('Rutas no encontrados');
+      return [];
     }
     return ruta.map((c) => new RutaResponseDTO(c));
+  }
+
+  /**
+   * Ordena rutas activas por cercanía del origen y destino del usuario al LINESTRING guardado en PostGIS.
+   */
+  async sugerirRutas(
+    origenLat: number,
+    origenLng: number,
+    destinoLat: number,
+    destinoLng: number,
+  ): Promise<RutaSugeridaDTO[]> {
+    const rutas = await this.repo.findAllRutasActivas();
+    const scored: RutaSugeridaDTO[] = [];
+
+    for (const r of rutas) {
+      const coords = parseLineStringCoords(r.coordenadas as unknown);
+      if (!coords) continue;
+
+      const dOrigen = minDistanceToPolylineM(origenLat, origenLng, coords);
+      const dDest = minDistanceToPolylineM(destinoLat, destinoLng, coords);
+      if (!Number.isFinite(dOrigen) || !Number.isFinite(dDest)) continue;
+
+      scored.push({
+        id_ruta: r.id_ruta,
+        nombre_ruta: r.nombre_ruta,
+        destino: r.destino,
+        nombre_empresa: r.empresa?.nombre_empresa ?? '',
+        proximidad_total_m: Math.round(dOrigen + dDest),
+        coordenadas: { type: 'LineString', coordinates: coords },
+        colorhex: r.colorhex,
+      });
+    }
+
+    scored.sort((a, b) => a.proximidad_total_m - b.proximidad_total_m);
+    return scored;
+  }
+
+  /**
+   * Para una ruta concreta, calcula sobre el LINESTRING el punto más cercano al origen y al destino del pasajero.
+   */
+  async puntosAcceso(
+    id_ruta: string,
+    origenLat: number,
+    origenLng: number,
+    destinoLat: number,
+    destinoLng: number,
+  ): Promise<PuntosAccesoRutaDTO> {
+    const ruta = await this.repo.findRutaById(id_ruta);
+    if (!ruta) {
+      throw new ValidationError('Ruta no encontrada');
+    }
+    const coords = parseLineStringCoords(ruta.coordenadas as unknown);
+    if (!coords) {
+      throw new ValidationError('La ruta no tiene coordenadas válidas');
+    }
+
+    const sub = closestPointOnPolylineM(origenLat, origenLng, coords);
+    const baj = closestPointOnPolylineM(destinoLat, destinoLng, coords);
+    if (!sub || !baj) {
+      throw new ValidationError('No se pudo calcular puntos sobre el recorrido');
+    }
+
+    return {
+      id_ruta: ruta.id_ruta,
+      nombre_ruta: ruta.nombre_ruta,
+      coordenadas: { type: 'LineString' as const, coordinates: coords },
+      colorhex: ruta.colorhex,
+      parada_subida: {
+        latitud: sub.latitud,
+        longitud: sub.longitud,
+        distancia_desde_referencia_m: sub.distancia_m,
+      },
+      parada_bajada: {
+        latitud: baj.latitud,
+        longitud: baj.longitud,
+        distancia_desde_referencia_m: baj.distancia_m,
+      },
+    };
   }
 
   //obtener ruta por nombre_ruta

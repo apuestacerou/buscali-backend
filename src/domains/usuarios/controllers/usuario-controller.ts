@@ -155,7 +155,7 @@ export async function updateUsuario(
   next: NextFunction,
 ) {
   try {
-    const id = parseInt(req.params.cedula);
+    const id = parseInt(req.params.id, 10);
     // transforma req.body(JSON) a UpdateUsuarioDTO y valida los datos usando class-validator
     const dto = plainToInstance(
       UpdateUsuarioDTO,
@@ -179,7 +179,7 @@ export async function deleteUsuario(
   next: NextFunction,
 ) {
   try {
-    const id = parseInt(req.params.cedula);
+    const id = parseInt(req.params.id, 10);
     await service.delete(id);
     // 204 significa "No Content", no se devuelve body
     return res.status(204).end();

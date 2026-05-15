@@ -26,9 +26,8 @@ export class UsuarioService {
    */
   async list(): Promise<UsuarioResponseDTO[]> {
     const usuarios: Usuario[] = await this.repo.findAllUsuarios();
-    //verifica si hay conductores, si no hay lanza un error
     if (usuarios.length === 0) {
-      throw new ValidationError('Conductores no encontrados');
+      return [];
     }
     return usuarios.map((c) => new UsuarioResponseDTO(c));
   }
@@ -199,20 +198,20 @@ export class UsuarioService {
     dto: UpdateUsuarioDTO,
   ): Promise<UsuarioResponseDTO | null> {
     const errors: string[] = [];
-    //valida que no exista un conductor con el mismo correo_electronico
-    // const existing_correo_electronico =
-    //   await this.repo.findUsuarioByCorreoElectronico(
-    //     dto.correo_electronico || '',
-    //   );
-    // if (existing_correo_electronico) {
-    //   errors.push('Conductor con este correo electronico ya existe');
-    // }
-    //valida que no exista un conductor con el mismo telefono
-    const existing_telefono = await this.repo.findUsuarioByTelefono(
-      dto.telefono || '',
-    );
-    if (existing_telefono) {
-      errors.push('Conductor con este telefono ya existe');
+
+    if (dto.correo?.trim()) {
+      const existing = await this.repo.findUsuarioByCorreo(dto.correo.trim());
+      if (existing && existing.id_usuario !== id) {
+        errors.push('Usuario con este correo ya existe');
+      }
+    }
+    if (dto.telefono?.trim()) {
+      const existing_telefono = await this.repo.findUsuarioByTelefono(
+        dto.telefono.trim(),
+      );
+      if (existing_telefono && existing_telefono.id_usuario !== id) {
+        errors.push('Usuario con este telefono ya existe');
+      }
     }
     if (errors.length > 0) {
       throw new ConflictError(errors);

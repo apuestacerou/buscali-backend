@@ -71,6 +71,18 @@ export class Usuario extends Model {
   })
   declare passwordHash: string;
 
+  @Column({
+    type: DataType.STRING(255),
+    allowNull: true,
+  })
+  declare resetToken: string | null;
+
+  @Column({
+    type: DataType.DATE,
+    allowNull: true,
+  })
+  declare resetExpires: Date | null;
+
   /** Rol: pasajero, conductor o administrador. Por defecto "pasajero" */
   @Column({
     type: DataType.STRING(20),

@@ -8,14 +8,18 @@ import {
   getRutaByEmpresa,
   getRutaByDestino,
   updateRuta,
+  sugerirRutas,
+  puntosAccesoRuta,
 } from '../controllers/ruta-controller';
 
 const router = Router();
 router.get('/', listRuta);
-router.post('/', jwtAuth, requireAuth, createRuta);
-router.get('/:nombre_ruta', getRuta);
+router.get('/sugerir', sugerirRutas);
+router.get('/puntos-acceso', puntosAccesoRuta);
 router.get('/destino/:destino', getRutaByDestino);
 router.get('/empresa/:nombre_empresa', getRutaByEmpresa);
+router.get('/:nombre_ruta', getRuta);
+router.post('/', jwtAuth, requireAuth, createRuta);
 router.put('/:nombre_ruta', jwtAuth, requireAuth, updateRuta);
 
 export default router;

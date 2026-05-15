@@ -14,6 +14,11 @@ export class RutaRepository {
     return rutas.map((c) => c.toJSON() as Ruta);
   }
 
+  async findAllRutasActivas(): Promise<Ruta[]> {
+    const rutas = await RutaModel.findAll({ where: { estado: 'Activa' } });
+    return rutas.map((c) => c.toJSON() as Ruta);
+  }
+
   private async findRuta(where: WhereOptions<RutaModel>): Promise<Ruta | null> {
     const ruta = await RutaModel.findOne({ where });
     return ruta ? (ruta.toJSON() as Ruta) : null;
@@ -26,6 +31,11 @@ export class RutaRepository {
   //   return this.findRuta({ id_ruta });
   // }
   // nombre_ruta
+  async findRutaById(id_ruta: string): Promise<Ruta | null> {
+    const ruta = await RutaModel.findByPk(id_ruta);
+    return ruta ? (ruta.toJSON() as Ruta) : null;
+  }
+
   async findRutaByNombre(nombre_ruta: string): Promise<Ruta | null> {
     return this.findRuta({ nombre_ruta });
   }

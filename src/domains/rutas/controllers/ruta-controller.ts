@@ -4,8 +4,115 @@ import { CreateRutaDTO, UpdateRutaDTO } from '../dto/ruta-dto';
 import { plainToInstance } from 'class-transformer';
 import { checkDto } from '../../../shared/utils/checkDTO';
 import { sendSuccess } from '../../../shared/utils/sendSuccess';
+import { ValidationError } from '../../../shared/errors/error.class';
 
 const service = new RutaService();
+
+function queryCoord(v: unknown): number | null {
+  if (v === undefined || v === null || v === '') return null;
+  const n = typeof v === 'string' ? parseFloat(v) : Number(v);
+  if (!Number.isFinite(n)) return null;
+  return n;
+}
+
+export async function sugerirRutas(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const origenLat = queryCoord(req.query.origenLat);
+    const origenLng = queryCoord(req.query.origenLng);
+    const destinoLat = queryCoord(req.query.destinoLat);
+    const destinoLng = queryCoord(req.query.destinoLng);
+
+    if (
+      origenLat === null ||
+      origenLng === null ||
+      destinoLat === null ||
+      destinoLng === null
+    ) {
+      throw new ValidationError(
+        'Parámetros requeridos: origenLat, origenLng, destinoLat, destinoLng (números válidos)',
+      );
+    }
+    if (origenLat < -90 || origenLat > 90 || destinoLat < -90 || destinoLat > 90) {
+      throw new ValidationError('Latitud fuera de rango (-90 a 90)');
+    }
+    if (
+      origenLng < -180 ||
+      origenLng > 180 ||
+      destinoLng < -180 ||
+      destinoLng > 180
+    ) {
+      throw new ValidationError('Longitud fuera de rango (-180 a 180)');
+    }
+
+    const sugerencias = await service.sugerirRutas(
+      origenLat,
+      origenLng,
+      destinoLat,
+      destinoLng,
+    );
+    return sendSuccess(res, 200, 'Rutas sugeridas', sugerencias);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function puntosAccesoRuta(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const idRuta =
+      typeof req.query.idRuta === 'string' ? req.query.idRuta.trim() : '';
+    if (!idRuta) {
+      throw new ValidationError(
+        'Parámetro requerido: idRuta (identificador de la ruta)',
+      );
+    }
+
+    const origenLat = queryCoord(req.query.origenLat);
+    const origenLng = queryCoord(req.query.origenLng);
+    const destinoLat = queryCoord(req.query.destinoLat);
+    const destinoLng = queryCoord(req.query.destinoLng);
+
+    if (
+      origenLat === null ||
+      origenLng === null ||
+      destinoLat === null ||
+      destinoLng === null
+    ) {
+      throw new ValidationError(
+        'Parámetros requeridos: origenLat, origenLng, destinoLat, destinoLng (números válidos)',
+      );
+    }
+    if (origenLat < -90 || origenLat > 90 || destinoLat < -90 || destinoLat > 90) {
+      throw new ValidationError('Latitud fuera de rango (-90 a 90)');
+    }
+    if (
+      origenLng < -180 ||
+      origenLng > 180 ||
+      destinoLng < -180 ||
+      destinoLng > 180
+    ) {
+      throw new ValidationError('Longitud fuera de rango (-180 a 180)');
+    }
+
+    const puntos = await service.puntosAcceso(
+      idRuta,
+      origenLat,
+      origenLng,
+      destinoLat,
+      destinoLng,
+    );
+    return sendSuccess(res, 200, 'Puntos de acceso al recorrido', puntos);
+  } catch (error) {
+    next(error);
+  }
+}
 
 // Listar todos los conductores
 export async function listRuta(
