@@ -87,7 +87,7 @@ export async function loginUsuario(
     res.cookie('access_token', login.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
     });
     console.log('Login exitoso');
     return sendSuccess(res, 200, 'Sesión iniciada correctamente', {

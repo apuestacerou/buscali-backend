@@ -71,7 +71,7 @@ export async function createConductor(
     res.cookie('access_token', login.token, {
       httpOnly: true, // solo accesible desde el servidor
       secure: process.env.NODE_ENV === 'production', // solo por https en producción
-      sameSite: 'strict', // solo desde el mismo dominio
+      sameSite: 'none', // para que viaje entre dominios
       // maxAge: 1000 * 60 * 60 // opcional: 1 hora
     });
     return sendSuccess(
