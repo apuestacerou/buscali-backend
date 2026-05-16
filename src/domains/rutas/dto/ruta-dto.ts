@@ -21,14 +21,16 @@ class NodoDto {
   // - lat: number
   // - lng: number
 
-  @IsNumber({}, { message: 'Latitud debe ser numérica' })
-  @IsNotEmpty()
-  @IsLatitude()
+  @IsNumber({}, { message: 'La latitud debe ser un número válido.' })
+  @IsNotEmpty({ message: 'La latitud es obligatoria en cada punto de la ruta.' })
+  @IsLatitude({ message: 'La latitud debe estar entre -90 y 90.' })
   lat?: number;
 
-  @IsNumber({}, { message: 'Longitud debe ser numérica' })
-  @IsNotEmpty()
-  @IsLongitude()
+  @IsNumber({}, { message: 'La longitud debe ser un número válido.' })
+  @IsNotEmpty({
+    message: 'La longitud es obligatoria en cada punto de la ruta.',
+  })
+  @IsLongitude({ message: 'La longitud debe estar entre -180 y 180.' })
   lng?: number;
 }
 
@@ -44,62 +46,65 @@ export class CreateRutaDTO {
   // - colorhex: string
   // - estado?: string
 
-  @IsString({ message: 'El nombre de la ruta debe ser una cadena de texto' })
-  @IsNotEmpty({ message: 'El nombre de la ruta no puede estar vacío' })
+  @IsString({
+    message: 'El nombre de la ruta debe ser texto.',
+  })
+  @IsNotEmpty({ message: 'El nombre de la ruta es obligatorio.' })
   @Matches(/^(?!\s*$).+/, {
-    message: 'El nombre de la ruta no puede ser solo espacios',
+    message: 'El nombre de la ruta no puede ser solo espacios.',
   })
   @Matches(/^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñ\s\.]+$/, {
     message:
-      'El nombre de la ruta solo puede contener letras, números, espacios y puntos',
+      'El nombre solo puede incluir letras, números, espacios y puntos.',
   })
   nombre_ruta!: string;
 
-  @IsString({ message: 'El destino de la ruta debe ser una cadena de texto' })
-  @IsNotEmpty({ message: 'El destino de la ruta no puede estar vacío' })
+  @IsString({ message: 'El destino debe ser texto.' })
+  @IsNotEmpty({ message: 'El destino es obligatorio.' })
   @Matches(/^(?!\s*$).+/, {
-    message: 'El destino de la ruta no puede ser solo espacios',
+    message: 'El destino no puede ser solo espacios.',
   })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, {
-    message: 'El destino de la ruta solo puede contener letras y espacios',
+    message: 'El destino solo puede incluir letras y espacios.',
   })
   destino!: string;
 
   @IsOptional() // Permite que el campo sea opcional al crear un ruta
   @IsString({
-    message: 'La descripción de la ruta debe ser una cadena de texto',
+    message: 'La descripción debe ser texto.',
   })
   @Matches(/^(?!\s*$).+/, {
-    message: 'La descripción de la ruta no puede ser solo espacios',
+    message: 'La descripción no puede ser solo espacios.',
   })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, {
-    message: 'La descripción de la ruta solo puede contener letras y espacios',
+    message: 'La descripción solo puede incluir letras y espacios.',
   })
   descripcion?: string;
 
-  @IsNotEmpty({ message: 'El Nombre de la empresa no puede estar vacío' })
-  @IsString({ message: 'El nombre de la empresa debe ser una cadena de texto' })
+  @IsNotEmpty({ message: 'El nombre de la empresa es obligatorio.' })
+  @IsString({ message: 'El nombre de la empresa debe ser texto.' })
   @Matches(/^(?!\s*$).+/, {
-    message: 'El Nombre de la empresa no puede ser solo espacios',
+    message: 'El nombre de la empresa no puede ser solo espacios.',
   })
   @Matches(/^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñ\s\.]+$/, {
     message:
-      'El nombre de la empresa solo puede contener letras, números, espacios y puntos',
+      'El nombre de la empresa solo puede incluir letras, números, espacios y puntos.',
   }) // Validación para permitir solo letras, números, espacios y puntos
   nombre_empresa!: string;
 
   //posible solucion
   @IsOptional() // Permite que el campo sea opcional al crear un ruta
-  @IsString({ message: 'El ID de la empresa debe ser una cadena de texto' })
-  @IsNotEmpty({ message: 'El ID de la empresa no puede estar vacío' })
+  @IsString({ message: 'El ID de la empresa debe ser texto.' })
+  @IsNotEmpty({ message: 'El ID de la empresa es obligatorio.' })
   @Matches(/^(?!\s*$).+/, {
-    message: 'El ID de la Empresa no puede ser solo espacios',
+    message: 'El ID de la empresa no puede ser solo espacios.',
   })
   id_empresa!: string; // Usamos ID en el DTO, el nombre se obtiene con un Join después
 
   @IsArray()
   @ArrayMinSize(2, {
-    message: 'Una ruta debe tener al menos 2 puntos/nodos (inicio y fin)',
+    message:
+      'Agrega al menos dos puntos en el mapa (inicio y fin del recorrido).',
   })
   // Validamos que sea un array de arrays de números: [[lng, lat], [lng, lat]]
   //transformr al formato geojson en el services
@@ -107,16 +112,18 @@ export class CreateRutaDTO {
   @Type(() => NodoDto)
   coordenadas!: NodoDto[];
 
-  @IsHexColor()
+  @IsHexColor({
+    message:
+      'El color debe ser un código hexadecimal válido (por ejemplo #2563EB).',
+  })
   colorhex!: string;
 
   @IsOptional() // Permite que el campo sea opcional al crear un ruta
   @Matches(/^(?!\s*$).+/, {
-    message: 'El Estado de la ruta no puede ser solo espacios',
+    message: 'El estado no puede ser solo espacios.',
   })
   @IsEnum(['Activa', 'Inactiva'], {
-    message:
-      'Estado debe ser "Activa" o "Inactiva", con la primera letra en mayúscula',
+    message: 'El estado debe ser Activa o Inactiva.',
   })
   estado?: string;
 }
@@ -136,49 +143,50 @@ export class UpdateRutaDTO {
   @IsOptional()
   @IsString()
   @Matches(/^(?!\s*$).+/, {
-    message: 'El nombre de la ruta no puede ser solo espacios',
+    message: 'El nombre de la ruta no puede ser solo espacios.',
   })
   @Matches(/^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñ\s\.]+$/, {
     message:
-      'El nombre de la ruta solo puede contener letras, números, espacios y puntos',
+      'El nombre solo puede incluir letras, números, espacios y puntos.',
   })
   nombre_ruta?: string;
 
   @IsOptional() // Permite que el campo sea opcional al actualizar un ruta
   @IsString()
   @Matches(/^(?!\s*$).+/, {
-    message: 'El destino de la ruta no puede ser solo espacios',
+    message: 'El destino no puede ser solo espacios.',
   })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, {
-    message: 'El destino de la ruta solo puede contener letras y espacios',
+    message: 'El destino solo puede incluir letras y espacios.',
   })
   destino?: string;
 
   @IsOptional() // Permite que el campo sea opcional al actualizar un ruta
-  @IsString({ message: 'El nombre de la empresa debe ser una cadena de texto' })
+  @IsString({ message: 'El nombre de la empresa debe ser texto.' })
   @Matches(/^(?!\s*$).+/, {
-    message: 'El Nombre de la empresa no puede ser solo espacios',
+    message: 'El nombre de la empresa no puede ser solo espacios.',
   })
   @Matches(/^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñ\s\.]+$/, {
     message:
-      'El nombre de la empresa solo puede contener letras, números, espacios y puntos',
+      'El nombre de la empresa solo puede incluir letras, números, espacios y puntos.',
   }) // Validación para permitir solo letras, números, espacios y puntos
   nombre_empresa?: string;
 
   @IsOptional() // Permite que el campo sea opcional al actualizar un ruta
   @IsString({})
   @Matches(/^(?!\s*$).+/, {
-    message: 'El ID de la Empresa no puede ser solo espacios',
+    message: 'El ID de la empresa no puede ser solo espacios.',
   })
   id_empresa?: string;
 
   @IsOptional()
   @Matches(/^(?!\s*$).+/, {
-    message: 'Los nodos de la ruta no pueden ser solo espacios',
+    message: 'Los puntos del recorrido no pueden ser solo espacios.',
   })
   @IsArray()
   @ArrayMinSize(2, {
-    message: 'Una ruta debe tener al menos 2 puntos/nodos (inicio y fin)',
+    message:
+      'Agrega al menos dos puntos en el mapa (inicio y fin del recorrido).',
   })
   // Validamos que sea un array de arrays de números: [[lng, lat], [lng, lat]]
   //transformr al formato geojson en el services
@@ -186,16 +194,18 @@ export class UpdateRutaDTO {
   @Type(() => NodoDto)
   coordenadas!: NodoDto[];
 
-  @IsHexColor()
+  @IsHexColor({
+    message:
+      'El color debe ser un código hexadecimal válido (por ejemplo #2563EB).',
+  })
   colorhex!: string;
 
   @IsOptional() // Permite que el campo sea opcional al actualizar un ruta
   @Matches(/^(?!\s*$).+/, {
-    message: 'El Estado de la ruta no puede ser solo espacios',
+    message: 'El estado no puede ser solo espacios.',
   })
   @IsEnum(['Activa', 'Inactiva'], {
-    message:
-      'Estado debe ser "Activa" o "Inactiva", con la primera letra en mayúscula',
+    message: 'El estado debe ser Activa o Inactiva.',
   })
   estado?: string;
 }

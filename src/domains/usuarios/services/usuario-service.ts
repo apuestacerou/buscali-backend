@@ -38,7 +38,7 @@ export class UsuarioService {
     // Verificar si el correo ya existe
     const existingCorreo = await this.repo.findUsuarioByCorreo(dto.correo);
     if (existingCorreo) {
-      errors.push('Usuario con este correo ya existe');
+      errors.push('Este correo ya está registrado. Inicia sesión o usa otro correo.');
     }
 
     // Verificar si el teléfono ya existe (si se proporciona)
@@ -47,14 +47,14 @@ export class UsuarioService {
         dto.telefono,
       );
       if (existingTelefono) {
-        errors.push('Usuario con este teléfono ya existe');
+        errors.push('Este número de teléfono ya está registrado.');
       }
     }
 
     // Validar aceptación de términos
     if (!dto.aceptaTerminos) {
       errors.push(
-        'Es obligatorio aceptar los términos y condiciones para registrarse',
+        'Debes aceptar los términos y condiciones para crear tu cuenta.',
       );
     }
 
@@ -91,7 +91,7 @@ export class UsuarioService {
 
     // Verificar que se proporcione al menos correo o teléfono
     if (!dto.correo && !dto.telefono) {
-      errors.push('Debe proporcionar correo electrónico o teléfono');
+      errors.push('Ingresa tu correo electrónico o tu número de teléfono.');
     }
 
     let existingUsuario: Usuario | null = null;
@@ -100,13 +100,13 @@ export class UsuarioService {
     if (dto.correo) {
       existingUsuario = await this.repo.findUsuarioByCorreo(dto.correo);
       if (!existingUsuario) {
-        errors.push('Usuario con este correo electrónico no existe');
+        errors.push('No hay una cuenta asociada a este correo electrónico.');
       }
     } else if (dto.telefono) {
       // Buscar usuario por teléfono
       existingUsuario = await this.repo.findUsuarioByTelefono(dto.telefono);
       if (!existingUsuario) {
-        errors.push('Usuario con este teléfono no existe');
+        errors.push('No hay una cuenta asociada a este teléfono.');
       }
     }
 
@@ -117,7 +117,7 @@ export class UsuarioService {
         existingUsuario.password,
       );
       if (!isValid) {
-        errors.push('Contraseña no válida');
+        errors.push('La contraseña no coincide. Vuelve a intentarlo.');
       }
     }
 
@@ -148,7 +148,9 @@ export class UsuarioService {
   async forgotPassword(dto: ForgotPasswordDTO): Promise<{ message: string }> {
     const usuario = await this.repo.findUsuarioByCorreo(dto.correo);
     if (!usuario) {
-      throw new ValidationError('Correo electrónico no registrado');
+      throw new ValidationError(
+        'Este correo no está registrado. Verifica que esté bien escrito.',
+      );
     }
 
     // Generar token de recuperación (32 caracteres hex)
@@ -165,7 +167,8 @@ export class UsuarioService {
     console.log('Enlace de recuperación generado:', recoveryLink);
 
     return {
-      message: 'Token generado correctamente (revisar consola)',
+      message:
+        'Si la cuenta existe, recibirás un correo con los pasos a seguir. En desarrollo, revisa la consola del servidor para ver el enlace.',
     };
   }
 
@@ -180,7 +183,9 @@ export class UsuarioService {
       await bcrypt.hash(dto.nueva_password, 10),
     );
     if (!usuario) {
-      throw new ValidationError('Token inválido o expirado');
+      throw new ValidationError(
+        'El enlace de recuperación venció o no es válido. Solicita uno nuevo.',
+      );
     }
   }
 
@@ -188,7 +193,7 @@ export class UsuarioService {
     const usuario: Usuario | null = await this.repo.findUsuarioById(id);
     //verifica si el usuario existe, si no existe lanza un error
     if (!usuario) {
-      throw new ValidationError('Usuario no encontrado');
+      throw new ValidationError('No encontramos un usuario con esos datos.');
     }
     return usuario ? new UsuarioResponseDTO(usuario) : null;
   }
@@ -202,7 +207,7 @@ export class UsuarioService {
     if (dto.correo?.trim()) {
       const existing = await this.repo.findUsuarioByCorreo(dto.correo.trim());
       if (existing && existing.id_usuario !== id) {
-        errors.push('Usuario con este correo ya existe');
+        errors.push('Este correo ya está registrado. Inicia sesión o usa otro correo.');
       }
     }
     if (dto.telefono?.trim()) {
@@ -210,7 +215,7 @@ export class UsuarioService {
         dto.telefono.trim(),
       );
       if (existing_telefono && existing_telefono.id_usuario !== id) {
-        errors.push('Usuario con este telefono ya existe');
+        errors.push('Este número de teléfono ya está registrado en otra cuenta.');
       }
     }
     if (errors.length > 0) {
@@ -221,7 +226,7 @@ export class UsuarioService {
     const usuario: Usuario | null = await this.repo.findUsuarioById(id);
     //verifica si el conductor existe, si no existe lanza un error
     if (!usuario) {
-      throw new ValidationError('Usuario no encontrado');
+      throw new ValidationError('No encontramos un usuario con esos datos.');
     }
 
     const updated = await this.repo.updateUsuario(id, dto);
@@ -232,7 +237,7 @@ export class UsuarioService {
     const usuario: Usuario | null = await this.repo.findUsuarioById(id);
     //verifica si el conductor existe, si no existe lanza un error
     if (!usuario) {
-      throw new ValidationError('Usuario no encontrado');
+      throw new ValidationError('No encontramos un usuario con esos datos.');
     }
     return await this.repo.deleteUsuario(id);
   }

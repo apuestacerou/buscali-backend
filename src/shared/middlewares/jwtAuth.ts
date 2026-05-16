@@ -14,6 +14,6 @@ export function jwtAuth(req: Request, res: Response, next: NextFunction) {
     req.auth = data;
     return next();
   } catch (err) {
-    return next(new UnauthorizedError('Sesión inválida'));
+    return next(new UnauthorizedError('Tu sesión no es válida o expiró. Vuelve a iniciar sesión.'));
   }
 }

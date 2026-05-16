@@ -101,17 +101,21 @@ export class RutaService {
   ): Promise<PuntosAccesoRutaDTO> {
     const ruta = await this.repo.findRutaById(id_ruta);
     if (!ruta) {
-      throw new ValidationError('Ruta no encontrada');
+      throw new ValidationError('No encontramos esa ruta.');
     }
     const coords = parseLineStringCoords(ruta.coordenadas as unknown);
     if (!coords) {
-      throw new ValidationError('La ruta no tiene coordenadas válidas');
+      throw new ValidationError(
+        'Esta ruta no tiene un trazado válido en el mapa.',
+      );
     }
 
     const sub = closestPointOnPolylineM(origenLat, origenLng, coords);
     const baj = closestPointOnPolylineM(destinoLat, destinoLng, coords);
     if (!sub || !baj) {
-      throw new ValidationError('No se pudo calcular puntos sobre el recorrido');
+      throw new ValidationError(
+        'No pudimos ubicar paradas sobre este recorrido. Comprueba las coordenadas.',
+      );
     }
 
     return {
@@ -137,7 +141,7 @@ export class RutaService {
     const ruta: Ruta | null = await this.repo.findRutaByNombre(nombreRuta);
     //verifica si la ruta existe, si no existe lanza un error
     if (!ruta) {
-      throw new ValidationError('Ruta no encontrada');
+      throw new ValidationError('No encontramos esa ruta.');
     }
 
     return ruta ? new RutaResponseDTO(ruta) : null;
@@ -148,11 +152,15 @@ export class RutaService {
       await this.repoEmpresa.findEmpresaByNombre(nombreEmpresa);
     //verifica si la ruta existe, si no existe lanza un error
     if (!id_empresa) {
-      throw new ValidationError('Ruta no encontrada para esta empresa');
+      throw new ValidationError(
+        'No encontramos una empresa con ese nombre. Revisa la información.',
+      );
     }
     const ruta: Ruta | null = await this.repo.findRutaByEmpresa(id_empresa);
     if (!ruta) {
-      throw new ValidationError('Ruta no encontrada para esta empresa');
+      throw new ValidationError(
+        'Esa empresa aún no tiene rutas registradas en el sistema.',
+      );
     }
 
     return new RutaResponseDTO(ruta);
@@ -162,7 +170,9 @@ export class RutaService {
     const ruta: Ruta | null = await this.repo.findRutaByDestino(destino);
     //verifica si la ruta existe, si no existe lanza un error
     if (!ruta) {
-      throw new ValidationError('Ruta no encontrada para este destino');
+      throw new ValidationError(
+        'No encontramos una ruta que llegue a ese destino.',
+      );
     }
     return new RutaResponseDTO(ruta);
   }
@@ -177,7 +187,9 @@ export class RutaService {
     );
 
     if (!empresa_ruta) {
-      errors.push(`La empresa ${dto.nombre_empresa} no existe.`);
+      errors.push(
+        `No encontramos la empresa «${dto.nombre_empresa}». Revisa el nombre.`,
+      );
     }
 
     // transformar al formato GeoJSON antes de guardar en PostGIS:
@@ -197,7 +209,7 @@ export class RutaService {
 
     if (existing_ruta) {
       errors.push(
-        'Ya existe una ruta con este trayecto exacto para esta empresa',
+        'Ya existe una ruta con este mismo recorrido para esa empresa.',
       );
     }
 
@@ -226,19 +238,19 @@ export class RutaService {
     // Obtener la ruta existente por nombre para conseguir su id
     const ruta: Ruta | null = await this.repo.findRutaByNombre(nombre_ruta);
     if (!ruta) {
-      throw new ValidationError('Ruta no encontrado');
+      throw new ValidationError('No encontramos una ruta con ese nombre.');
     }
 
     const existing_nombre = await this.repo.findRutaByNombre(nombre_ruta);
     if (existing_nombre && existing_nombre.nombre_ruta !== nombre_ruta) {
-      throw new ValidationError('Ruta con este nombre ya existe');
+      throw new ValidationError('Ya existe una ruta con ese nombre.');
     }
 
     const existing_destino = await this.repo.findRutaByDestino(
       dto.destino || '',
     );
     if (existing_destino) {
-      throw new ValidationError('Ruta con este destino ya existe');
+      throw new ValidationError('Ya existe una ruta hacia ese destino.');
     }
 
     // Si se está actualizando el nombre de la empresa, verificar que exista
@@ -255,7 +267,7 @@ export class RutaService {
     );
     if (existing_ruta) {
       throw new ValidationError(
-        'Ya existe una ruta con este trayecto exacto para esta empresa',
+        'Ya existe una ruta con este mismo recorrido para esa empresa.',
       );
     }
 

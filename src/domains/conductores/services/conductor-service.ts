@@ -35,7 +35,7 @@ export class ConductorService {
       await this.repo.findConductorByCedula(cedula);
     //verifica si el conductor existe, si no existe lanza un error
     if (!conductor) {
-      throw new ValidationError('Conductor no encontrado');
+      throw new ValidationError('No encontramos un conductor con esos datos.');
     }
     return conductor ? new ConductorResponseDTO(conductor) : null;
   }
@@ -47,24 +47,24 @@ export class ConductorService {
 
     const existing_cedula = await this.repo.findConductorByCedula(dto.cedula);
     if (existing_cedula) {
-      errors.push('Conductor con esta cedula ya existe');
+      errors.push('Ya hay un conductor registrado con esta cédula.');
     }
     //valida que no exista un conductor con el mismo correo_electronico
     const existing_correo_electronico =
       await this.repo.findConductorByCorreoElectronico(dto.correo_electronico);
     if (existing_correo_electronico) {
-      errors.push('Conductor con este correo electronico ya existe');
+      errors.push('Ya hay un conductor registrado con este correo electrónico.');
     }
     //valida que no exista un conductor con el mismo telefono
     const existing_telefono = await this.repo.findConductorByTelefono(
       dto.telefono,
     );
     if (existing_telefono) {
-      errors.push('Conductor con este telefono ya existe');
+      errors.push('Ya hay un conductor registrado con este teléfono.');
     }
     //valida que acepte términos
     if (!dto.aceptaTerminos) {
-      errors.push('Debe aceptar los términos y condiciones');
+      errors.push('Debes aceptar los términos y condiciones para continuar.');
     }
     if (errors.length > 0) {
       throw new ConflictError(errors);
@@ -92,14 +92,14 @@ export class ConductorService {
         dto.correo_electronico.trim(),
       );
       if (otro && otro.cedula !== cedula) {
-        errors.push('Conductor con este correo electronico ya existe');
+        errors.push('Ya hay un conductor registrado con este correo electrónico.');
       }
     }
     if (dto.telefono?.trim()) {
       const tel = dto.telefono.replace(/\D/g, '');
       const otro = await this.repo.findConductorByTelefono(tel);
       if (otro && otro.cedula !== cedula) {
-        errors.push('Conductor con este telefono ya existe');
+        errors.push('Ya hay un conductor registrado con este teléfono.');
       }
     }
 
@@ -110,7 +110,7 @@ export class ConductorService {
     const conductor: Conductor | null =
       await this.repo.findConductorByCedula(cedula);
     if (!conductor) {
-      throw new ValidationError('Conductor no encontrado');
+      throw new ValidationError('No encontramos un conductor con esos datos.');
     }
 
     const patch: Partial<Conductor> = {};
@@ -137,7 +137,7 @@ export class ConductorService {
       await this.repo.findConductorByCedula(cedula);
     //verifica si el conductor existe, si no existe lanza un error
     if (!conductor) {
-      throw new ValidationError('Conductor no encontrado');
+      throw new ValidationError('No encontramos un conductor con esos datos.');
     }
     return await this.repo.deleteConductor(cedula);
   }
@@ -146,19 +146,19 @@ export class ConductorService {
     const errors: string[] = [];
 
     if (!dto.correo_electronico && !dto.telefono) {
-      errors.push('Debe proporcionar correo electrónico o teléfono');
+      errors.push('Ingresa tu correo electrónico o tu número de teléfono.');
     }
 
     let existing_conductor: Conductor | null = null;
     if (dto.correo_electronico) {
       existing_conductor = await this.repo.findConductorByCorreoElectronico(dto.correo_electronico);
       if (!existing_conductor) {
-        errors.push('Conductor con este correo electrónico no existe');
+        errors.push('No hay una cuenta asociada a este correo electrónico.');
       }
     } else if (dto.telefono) {
       existing_conductor = await this.repo.findConductorByTelefono(dto.telefono);
       if (!existing_conductor) {
-        errors.push('Conductor con este teléfono no existe');
+        errors.push('No hay una cuenta asociada a este teléfono.');
       }
     }
 
@@ -168,7 +168,7 @@ export class ConductorService {
         existing_conductor.contrasena,
       );
       if (!isValid) {
-        errors.push('Contraseña no válida');
+        errors.push('La contraseña no coincide. Vuelve a intentarlo.');
       }
     }
 
@@ -192,7 +192,9 @@ export class ConductorService {
   async forgotPassword(dto: ForgotPasswordDTO): Promise<void> {
     const conductor = await this.repo.findConductorByCorreoElectronico(dto.correo_electronico);
     if (!conductor) {
-      throw new ValidationError('Correo electrónico no registrado');
+      throw new ValidationError(
+        'Este correo no está registrado. Verifica que esté bien escrito.',
+      );
     }
 
     const token = crypto.randomBytes(16).toString('hex');
@@ -237,7 +239,9 @@ export class ConductorService {
   async resetPassword(dto: ResetPasswordDTO): Promise<void> {
     const conductor = await this.repo.resetPassword(dto.token, await bcrypt.hash(dto.nueva_contrasena, 10));
     if (!conductor) {
-      throw new ValidationError('Token inválido o expirado');
+      throw new ValidationError(
+        'El enlace de recuperación venció o no es válido. Solicita uno nuevo.',
+      );
     }
   }
 }

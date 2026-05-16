@@ -2,60 +2,64 @@ import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, Matches } from 'cla
 import { Usuario } from '../types/usuario';
 
 export class CreateUsuarioDTO {
-  @IsNotEmpty({ message: 'Nombre es requerido' })
+  @IsNotEmpty({ message: 'El nombre es obligatorio.' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,60}$/, {
-    message: 'Nombre solo puede contener letras y espacios',
+    message: 'El nombre solo puede incluir letras y espacios.',
   })
   nombre!: string;
 
-  @IsNotEmpty({ message: 'Apellido es requerido' })
+  @IsNotEmpty({ message: 'El apellido es obligatorio.' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,60}$/, {
-    message: 'Apellido solo puede contener letras y espacios',
+    message: 'El apellido solo puede incluir letras y espacios.',
   })
   apellido!: string;
 
-  @IsEmail({}, { message: 'Formato de correo electrónico inválido' })
+  @IsEmail({}, { message: 'Ingresa un correo electrónico válido.' })
   correo!: string;
 
   @IsOptional()
   @Matches(/^\+?[0-9]{7,15}$/, {
-    message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos',
+    message:
+      'El teléfono solo puede incluir números (entre 7 y 15 dígitos). Puedes anteponer +.',
   })
   telefono?: string;
 
-  @IsNotEmpty({ message: 'Contraseña es requerida' })
+  @IsNotEmpty({ message: 'La contraseña es obligatoria.' })
   @Matches(/^(?=.*[A-Z])(?=.*[0-9]).{8,50}$/, {
     message:
-      'La contraseña debe tener entre 8 y 50 caracteres, incluir al menos una mayúscula y un número',
+      'La contraseña debe tener entre 8 y 50 caracteres e incluir al menos una mayúscula y un número.',
   })
   password!: string;
 
-  @IsBoolean({ message: 'Debe aceptar los términos y condiciones' })
+  @IsBoolean({
+    message: 'Para registrarte debes aceptar los términos y condiciones.',
+  })
   aceptaTerminos!: boolean;
 }
 
 export class UpdateUsuarioDTO {
   @IsOptional()
-  @IsNotEmpty({ message: 'Nombre no puede estar vacío' })
+  @IsNotEmpty({ message: 'El nombre no puede quedar vacío.' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,60}$/, {
-    message: 'Nombre solo puede contener letras y espacios',
+    message: 'El nombre solo puede incluir letras y espacios.',
   })
   nombre?: string;
 
   @IsOptional()
-  @IsNotEmpty({ message: 'Apellido no puede estar vacío' })
+  @IsNotEmpty({ message: 'El apellido no puede quedar vacío.' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,60}$/, {
-    message: 'Apellido solo puede contener letras y espacios',
+    message: 'El apellido solo puede incluir letras y espacios.',
   })
   apellido?: string;
 
   @IsOptional()
-  @IsEmail({}, { message: 'Formato de correo electrónico inválido' })
+  @IsEmail({}, { message: 'Ingresa un correo electrónico válido.' })
   correo?: string;
 
   @IsOptional()
   @Matches(/^\+?[0-9]{7,15}$/, {
-    message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos',
+    message:
+      'El teléfono solo puede incluir números (entre 7 y 15 dígitos). Puedes anteponer +.',
   })
   telefono?: string;
 }
@@ -80,36 +84,39 @@ export class UsuarioResponseDTO {
 
 export class UsuarioLoginDTO {
   @IsOptional()
-  @IsEmail({}, { message: 'Formato de correo electrónico inválido' })
+  @IsEmail({}, { message: 'Ingresa un correo electrónico válido.' })
   correo?: string;
 
   @IsOptional()
   @Matches(/^\+?[0-9]{7,15}$/, {
-    message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos',
+    message:
+      'El teléfono solo puede incluir números (entre 7 y 15 dígitos). Puedes anteponer +.',
   })
   telefono?: string;
 
-  @IsNotEmpty({ message: 'Contraseña es requerida' })
+  @IsNotEmpty({ message: 'La contraseña es obligatoria.' })
   @Matches(/^(?=.*[A-Z])(?=.*[0-9]).{8,50}$/, {
     message:
-      'La contraseña debe tener entre 8 y 50 caracteres, incluir al menos una mayúscula y un número',
+      'La contraseña debe tener entre 8 y 50 caracteres e incluir al menos una mayúscula y un número.',
   })
   password!: string;
 }
 
 export class ForgotPasswordDTO {
-  @IsEmail({}, { message: 'Formato de correo electrónico inválido' })
+  @IsEmail({}, { message: 'Ingresa un correo electrónico válido.' })
   correo!: string;
 }
 
 export class ResetPasswordDTO {
-  @Matches(/^[A-Fa-f0-9]{32}$/, { message: 'Token inválido' })
+  @Matches(/^[A-Fa-f0-9]{32}$/, {
+    message: 'El enlace de recuperación no es válido.',
+  })
   token!: string;
 
-  @IsNotEmpty({ message: 'Nueva contraseña es requerida' })
+  @IsNotEmpty({ message: 'La nueva contraseña es obligatoria.' })
   @Matches(/^(?=.*[A-Z])(?=.*[0-9]).{8,50}$/, {
     message:
-      'La contraseña debe tener entre 8 y 50 caracteres, incluir al menos una mayúscula y un número',
+      'La nueva contraseña debe tener entre 8 y 50 caracteres e incluir al menos una mayúscula y un número.',
   })
   nueva_password!: string;
 }

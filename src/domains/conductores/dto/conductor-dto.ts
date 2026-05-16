@@ -9,47 +9,53 @@ import {
   ValidateIf,
 } from 'class-validator';
 
+function validateWhenProvided(_object: object, value: unknown): boolean {
+  return value != null && String(value).trim() !== '';
+}
+
 // DTO para crear un cliente
 export class CreateConductorDTO {
-  @IsNotEmpty({ message: 'La Cedula no puede estar vacía' })
+  @IsNotEmpty({ message: 'La cédula es obligatoria.' })
   @Matches(/^[0-9]{1,20}$/, {
-    message: 'La Cedula debe contener solo Números y un máximo de 20 dígitos',
-  }) // Validación para permitir solo dígitos en la cédula
+    message: 'La cédula solo puede contener números (hasta 20 dígitos).',
+  })
   cedula!: string;
 
-  @IsNotEmpty({ message: 'El nombre no puede estar vacío' })
-  @Matches(/\S/, { message: 'El nombre no puede ser solo espacios' })
+  @IsNotEmpty({ message: 'El nombre es obligatorio.' })
+  @Matches(/\S/, { message: 'El nombre no puede ser solo espacios.' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, {
-    message: 'Nombre solo puede contener letras y espacios',
-  }) // Validación para permitir solo letras y espacios
+    message: 'El nombre solo puede incluir letras y espacios.',
+  })
   nombre!: string;
 
-  @IsNotEmpty({ message: 'El correo no puede estar vacío' })
-  @IsEmail({}, { message: 'Formato de correo electrónico inválido' }) // Validación para formato de correo electrónico
+  @IsNotEmpty({ message: 'El correo es obligatorio.' })
+  @IsEmail({}, { message: 'Ingresa un correo electrónico válido.' })
   correo_electronico!: string;
 
-  @IsNotEmpty({ message: 'El Teléfono no puede estar vacío' })
+  @IsNotEmpty({ message: 'El teléfono es obligatorio.' })
   @Matches(/^\+?[0-9]{7,15}$/, {
-    message: 'Teléfono debe contener solo Números y entre 7 y 15 dígitos',
-  }) // Validación para permitir solo dígitos en el teléfono
+    message:
+      'El teléfono solo puede incluir números (entre 7 y 15 dígitos). Puedes anteponer +.',
+  })
   telefono!: string;
 
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/,
     {
       message:
-        'La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo',
+        'La contraseña debe tener entre 8 y 50 caracteres e incluir mayúscula, minúscula, número y un símbolo (@, $, !, %, *, ?, &).',
     },
-  ) // Validación para contraseñas seguras
+  )
   contrasena!: string;
 
-  @IsBoolean({ message: 'Debe aceptar los términos y condiciones' })
+  @IsBoolean({
+    message: 'Para registrarte debes aceptar los términos y condiciones.',
+  })
   aceptaTerminos!: boolean;
 
-  @IsOptional() // Permite que el campo sea opcional al crear un conductor
+  @IsOptional()
   @IsEnum(['Activo', 'Inactivo'], {
-    message:
-      'Estado debe ser "Activo" o "Inactivo", con la primera letra en mayúscula',
+    message: 'El estado debe ser Activo o Inactivo.',
   })
   estado?: string;
 }
@@ -57,29 +63,30 @@ export class CreateConductorDTO {
 // DTO para actualizar un conductor
 export class UpdateConductorDTO {
   @IsOptional()
-  @ValidateIf((_, v) => v != null && String(v).trim() !== '')
-  @Matches(/\S/, { message: 'El nombre no puede ser solo espacios' })
+  @ValidateIf(validateWhenProvided)
+  @Matches(/\S/, { message: 'El nombre no puede ser solo espacios.' })
   @Matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, {
-    message: 'Nombre solo puede contener letras y espacios',
+    message: 'El nombre solo puede incluir letras y espacios.',
   })
   nombre?: string;
 
   @IsOptional()
-  @ValidateIf((_, v) => v != null && String(v).trim() !== '')
-  @IsEmail({}, { message: 'Formato de correo electrónico inválido' })
+  @ValidateIf(validateWhenProvided)
+  @IsEmail({}, { message: 'Ingresa un correo electrónico válido.' })
   correo_electronico?: string;
 
   @IsOptional()
-  @ValidateIf((_, v) => v != null && String(v).trim() !== '')
+  @ValidateIf(validateWhenProvided)
   @Matches(/^\+?[0-9]{7,15}$/, {
-    message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos',
+    message:
+      'El teléfono solo puede incluir números (entre 7 y 15 dígitos). Puedes anteponer +.',
   })
   telefono?: string;
 
   @IsOptional()
-  @ValidateIf((_, v) => v != null && String(v).trim() !== '')
+  @ValidateIf(validateWhenProvided)
   @IsEnum(['Activo', 'Inactivo'], {
-    message: 'Estado debe ser "Activo" o "Inactivo"',
+    message: 'El estado debe ser Activo o Inactivo.',
   })
   estado?: string;
 }
@@ -104,12 +111,13 @@ export class ConductorResponseDTO {
 //DTO para login
 export class ConductorLoginDTO {
   @IsOptional()
-  @IsEmail({}, { message: 'Formato de correo electrónico inválido' })
+  @IsEmail({}, { message: 'Ingresa un correo electrónico válido.' })
   correo_electronico?: string;
 
   @IsOptional()
   @Matches(/^\+?[0-9]{7,15}$/, {
-    message: 'Telefono debe contener solo Números y entre 7 y 15 dígitos',
+    message:
+      'El teléfono solo puede incluir números (entre 7 y 15 dígitos). Puedes anteponer +.',
   })
   telefono?: string;
 
@@ -117,7 +125,7 @@ export class ConductorLoginDTO {
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/,
     {
       message:
-        'La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo',
+        'La contraseña debe tener entre 8 y 50 caracteres e incluir mayúscula, minúscula, número y un símbolo (@, $, !, %, *, ?, &).',
     },
   )
   contrasena!: string;
@@ -125,19 +133,21 @@ export class ConductorLoginDTO {
 
 //DTO para forgot password
 export class ForgotPasswordDTO {
-  @IsEmail({}, { message: 'Formato de correo electrónico inválido' })
+  @IsEmail({}, { message: 'Ingresa un correo electrónico válido.' })
   correo_electronico!: string;
 }
 
 //DTO para reset password
 export class ResetPasswordDTO {
-  @Matches(/^[A-Za-z0-9]{32}$/, { message: 'Token inválido' }) // Asumiendo token de 32 caracteres
+  @Matches(/^[A-Za-z0-9]{32}$/, {
+    message: 'El enlace de recuperación no es válido.',
+  })
   token!: string;
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/,
     {
       message:
-        'La contraseña debe tener entre 8 y 50 caracteres, incluir mayúscula, minúscula, número y símbolo',
+        'La nueva contraseña debe tener entre 8 y 50 caracteres e incluir mayúscula, minúscula, número y un símbolo (@, $, !, %, *, ?, &).',
     },
   )
   nueva_contrasena!: string;

@@ -17,7 +17,8 @@ export function errorHandler(
     return res.status(400).json({
       status: 'error',
       code: 400,
-      message: 'Error de validación',
+      message:
+        'Revisa los datos enviados; hay campos que no cumplen lo requerido.',
       errors: err.messages,
     });
   }
@@ -26,7 +27,8 @@ export function errorHandler(
     return res.status(409).json({
       status: 'error',
       code: 409,
-      message: 'Conflicto en la operación',
+      message:
+        'No pudimos guardar los cambios porque ya existe información similar.',
       errors: err.messages,
     });
   }
@@ -35,7 +37,7 @@ export function errorHandler(
     return res.status(401).json({
       status: 'error',
       code: 401,
-      message: 'No autorizado',
+      message: 'Necesitas iniciar sesión para continuar.',
       errors: err.messages,
     });
   }
@@ -43,7 +45,8 @@ export function errorHandler(
   return res.status(500).json({
     status: 'error',
     code: 500,
-    message: 'Error interno del servidor',
-    errors: [err.message || 'Unexpected error'],
+    message:
+      'Ocurrió un problema en el servidor. Intenta de nuevo en unos minutos.',
+    errors: [err.message || 'Error inesperado'],
   });
 }

@@ -33,11 +33,13 @@ export async function sugerirRutas(
       destinoLng === null
     ) {
       throw new ValidationError(
-        'Parámetros requeridos: origenLat, origenLng, destinoLat, destinoLng (números válidos)',
+        'Indica origenLat, origenLng, destinoLat y destinoLng como números válidos.',
       );
     }
     if (origenLat < -90 || origenLat > 90 || destinoLat < -90 || destinoLat > 90) {
-      throw new ValidationError('Latitud fuera de rango (-90 a 90)');
+      throw new ValidationError(
+        'La latitud debe estar entre -90 y 90 grados.',
+      );
     }
     if (
       origenLng < -180 ||
@@ -45,7 +47,9 @@ export async function sugerirRutas(
       destinoLng < -180 ||
       destinoLng > 180
     ) {
-      throw new ValidationError('Longitud fuera de rango (-180 a 180)');
+      throw new ValidationError(
+        'La longitud debe estar entre -180 y 180 grados.',
+      );
     }
 
     const sugerencias = await service.sugerirRutas(
@@ -70,7 +74,7 @@ export async function puntosAccesoRuta(
       typeof req.query.idRuta === 'string' ? req.query.idRuta.trim() : '';
     if (!idRuta) {
       throw new ValidationError(
-        'Parámetro requerido: idRuta (identificador de la ruta)',
+        'Falta el parámetro idRuta (identificador de la ruta).',
       );
     }
 
@@ -86,11 +90,13 @@ export async function puntosAccesoRuta(
       destinoLng === null
     ) {
       throw new ValidationError(
-        'Parámetros requeridos: origenLat, origenLng, destinoLat, destinoLng (números válidos)',
+        'Indica origenLat, origenLng, destinoLat y destinoLng como números válidos.',
       );
     }
     if (origenLat < -90 || origenLat > 90 || destinoLat < -90 || destinoLat > 90) {
-      throw new ValidationError('Latitud fuera de rango (-90 a 90)');
+      throw new ValidationError(
+        'La latitud debe estar entre -90 y 90 grados.',
+      );
     }
     if (
       origenLng < -180 ||
@@ -98,7 +104,9 @@ export async function puntosAccesoRuta(
       destinoLng < -180 ||
       destinoLng > 180
     ) {
-      throw new ValidationError('Longitud fuera de rango (-180 a 180)');
+      throw new ValidationError(
+        'La longitud debe estar entre -180 y 180 grados.',
+      );
     }
 
     const puntos = await service.puntosAcceso(
