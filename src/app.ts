@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 import express from 'express';
 import conductorRouter from './domains/conductores/routers/conductor-router';
 import rutasRouter from './domains/rutas/routers/ruta-router';

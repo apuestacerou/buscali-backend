@@ -4,7 +4,14 @@ import { RutaModel } from './models/ruta-model';
 import { EmpresaModel } from './models/empresa-model';
 import { Usuario } from './models/Usuario';
 
-const sequelize = new Sequelize(process.env.DATABASE_URL!, {
+const databaseUrl = process.env.DATABASE_URL?.trim();
+if (!databaseUrl) {
+  throw new Error(
+    'Falta DATABASE_URL. Copia .env.example a .env en la raíz del proyecto y asigna la cadena de conexión PostgreSQL (p. ej. de Neon).',
+  );
+}
+
+const sequelize = new Sequelize(databaseUrl, {
   dialect: 'postgres',
   timezone: process.env.TIMEZONE,
   /** Neon/servidor Postgres en la nube suelen cortar conexiones inactivas (ECONNRESET); el pool reduce fallos. */
